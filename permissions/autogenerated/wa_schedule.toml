@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-wa-schedule"
+description = "Enables the wa_schedule command without any pre-configured scope."
+commands.allow = ["wa_schedule"]
+
+[[permission]]
+identifier = "deny-wa-schedule"
+description = "Denies the wa_schedule command without any pre-configured scope."
+commands.deny = ["wa_schedule"]

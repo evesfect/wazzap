@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-wa-settings"
+description = "Enables the wa_settings command without any pre-configured scope."
+commands.allow = ["wa_settings"]
+
+[[permission]]
+identifier = "deny-wa-settings"
+description = "Denies the wa_settings command without any pre-configured scope."
+commands.deny = ["wa_settings"]

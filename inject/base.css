@@ -1,0 +1,503 @@
+/*
+ * Tellal sayfa içi parçalar: geri oku, saat düğmesi, zamanlama paneli, menü,
+ * sohbetteki zamanlanmış mesajlar. Hepsi WhatsApp'ın kendi renk değişkenlerini kullanır;
+ * tema açıksa o değişkenler zaten temaya göre boyandığı için WhatsApp'ın parçası gibi durur.
+ * Yazı tipi çalışma anında WhatsApp'tan kopyalanır.
+ */
+
+.wap-fab, .wap-panel, .wap-panel *, .wap-menu, .wap-menu *, .wap-toast, #wap-back {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- telefon modunda geri oku: WhatsApp başlık simgeleri gibi ---- */
+#wap-back {
+  display: none;
+  position: fixed;
+  z-index: 2147483000;
+  top: 12px;
+  left: 6px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--WDS-content-default, var(--icon, currentColor));
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+#wap-back:hover { background: var(--WDS-surface-highlight, rgba(134, 150, 160, 0.15)); }
+#wap-back:focus-visible { outline: 2px solid var(--WDS-accent, #00a884); outline-offset: 1px; }
+
+/* ---- saat düğmesi: WhatsApp'ın "en alta in" düğmesi gibi ---- */
+.wap-fab {
+  display: none;
+  position: fixed;
+  z-index: 2147483000;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--WDS-surface-elevated-default, var(--dropdown-background, var(--panel-background, #fff)));
+  color: var(--WDS-content-deemphasized, var(--icon, #54656f));
+  box-shadow: 0 0 0 1px var(--WDS-surface-highlight, rgba(134, 150, 160, 0.15)), 0 1px 1px 0 rgba(11, 20, 26, 0.06), 0 2px 5px 0 rgba(11, 20, 26, 0.2);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.wap-fab:hover { color: var(--WDS-content-default, var(--primary, #111b21)); }
+.wap-fab:focus-visible { outline: 2px solid var(--WDS-accent, #00a884); outline-offset: 2px; }
+
+/* ---- zamanlama paneli: WhatsApp açılır penceresi gibi ---- */
+.wap-panel {
+  position: fixed;
+  z-index: 2147483001;
+  border-radius: 16px;
+  background: var(--WDS-surface-elevated-default, var(--dropdown-background, var(--panel-background, #fff)));
+  color: var(--WDS-content-default, var(--primary, #111b21));
+  box-shadow: 0 0 0 1px var(--WDS-surface-highlight, rgba(134, 150, 160, 0.15)), 0 2px 5px 0 rgba(11, 20, 26, 0.26), 0 2px 10px 0 rgba(11, 20, 26, 0.16);
+  font-size: 14.2px;
+  line-height: 1.4;
+  overflow: hidden;
+}
+.wap-panel-head { display: flex; align-items: center; gap: 12px; padding: 12px 16px 4px 10px; }
+.wap-panel-titles { min-width: 0; }
+.wap-panel-title { font-size: 16px; font-weight: 500; }
+.wap-panel-sub {
+  font-size: 13px;
+  color: var(--WDS-content-deemphasized, var(--secondary, #667781));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.wap-icon-btn {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  padding: 0;
+  background: transparent;
+  color: var(--WDS-content-deemphasized, var(--icon, #54656f));
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.wap-icon-btn:hover { background: var(--WDS-surface-highlight, rgba(134, 150, 160, 0.15)); }
+.wap-panel-body { padding: 8px 16px 4px; }
+.wap-input {
+  display: block;
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: var(--WDS-systems-chat-surface-composer, var(--compose-input-background, #f0f2f5));
+  color: var(--WDS-content-default, var(--primary, #111b21));
+  font: inherit;
+  padding: 10px 12px;
+  outline: none;
+}
+.wap-input::placeholder { color: var(--input-placeholder, var(--WDS-content-deemphasized, #667781)); }
+.wap-input:focus { border-color: var(--input-border-active, var(--WDS-accent, #00a884)); }
+.wap-ta { resize: none; min-height: 72px; max-height: 220px; }
+.wap-dt { margin-top: 10px; color-scheme: inherit; }
+.wap-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.wap-when { margin-top: 6px; padding: 0 4px; font-size: 13px; color: var(--WDS-content-deemphasized, var(--secondary, #667781)); }
+.wap-when-bad { color: var(--WDS-content-negative, var(--danger, #ea0038)); }
+.wap-chip {
+  border: 0;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+  background: var(--WDS-surface-elevated-emphasized, var(--chip-button-background, #f0f2f5));
+  color: var(--WDS-content-deemphasized, var(--chip-button-foreground, #54656f));
+}
+.wap-chip:hover { color: var(--WDS-content-default, var(--primary, #111b21)); }
+.wap-chip[aria-pressed="true"] {
+  background: var(--WDS-components-filter-surface-selected, #d9fdd3);
+  color: var(--WDS-accent-emphasized, var(--WDS-accent, #008069));
+}
+.wap-panel-foot { display: flex; align-items: center; gap: 12px; padding: 12px 16px 16px; }
+.wap-st { flex: 1; min-width: 0; font-size: 13px; color: var(--WDS-content-deemphasized, var(--secondary, #667781)); }
+.wap-go {
+  border: 0;
+  border-radius: 24px;
+  padding: 9px 22px;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  background: var(--WDS-accent, var(--button-primary-background, #00a884));
+  color: var(--WDS-content-on-accent, #fff);
+}
+.wap-go:hover { filter: brightness(1.06); }
+.wap-go[disabled] { opacity: 0.55; cursor: default; }
+.wap-panel :focus-visible, .wap-menu :focus-visible { outline: 2px solid var(--WDS-accent, #00a884); outline-offset: 2px; }
+.wap-panel .wap-input:focus-visible { outline: none; }
+
+/* ---- menü: WhatsApp bağlam menüsü gibi ---- */
+.wap-menu {
+  position: fixed;
+  z-index: 2147483002;
+  min-width: 200px;
+  padding: 8px;
+  border-radius: 16px;
+  background: var(--WDS-surface-elevated-default, var(--dropdown-background, var(--panel-background, #fff)));
+  box-shadow: 0 0 0 1px var(--WDS-surface-highlight, rgba(134, 150, 160, 0.15)), 0 2px 5px 0 rgba(11, 20, 26, 0.26), 0 2px 10px 0 rgba(11, 20, 26, 0.16);
+}
+.wap-menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  background: transparent;
+  color: var(--WDS-content-default, var(--primary, #111b21));
+  font: inherit;
+  font-size: 14.5px;
+  cursor: pointer;
+}
+.wap-menu-item:hover, .wap-menu-item:focus { background: var(--WDS-surface-highlight, rgba(134, 150, 160, 0.15)); outline: none; }
+.wap-danger { color: var(--WDS-content-negative, var(--danger, #ea0038)); }
+
+/* ---- kısa bildirim şeridi ---- */
+.wap-toast {
+  position: fixed;
+  z-index: 2147483002;
+  left: 50%;
+  bottom: 24px;
+  transform: translate(-50%, 16px);
+  max-width: min(480px, calc(100vw - 32px));
+  padding: 12px 18px;
+  border-radius: 8px;
+  background: var(--WDS-surface-inverse, #3b4a54);
+  color: var(--WDS-content-inverse, #fff);
+  font-size: 14px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.wap-toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---- sohbetteki zamanlanmış mesajlar ---- */
+.wap-sched-zone { flex: 0 0 auto; padding: 6px 0 12px; }
+.wap-sched-sep { display: flex; justify-content: center; margin: 6px 0 8px; }
+.wap-sched-sep span {
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  background: var(--WDS-systems-bubble-surface-system, var(--system-message-background, #fff));
+  color: var(--WDS-content-deemphasized, var(--secondary, #667781));
+  box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+}
+.wap-ghost-row {
+  display: flex;
+  justify-content: flex-end;
+  padding: 2px var(--wap-gap-r, 63px) 2px var(--wap-gap-l, 63px);
+}
+.wap-ghost {
+  position: relative;
+  max-width: var(--wap-bubble-max, 65%);
+  padding: var(--wap-bubble-pad, 6px 7px 8px 9px);
+  border-radius: var(--wap-bubble-radius, 7.5px);
+  background: var(--WDS-systems-bubble-surface-outgoing, var(--outgoing-background, #d9fdd3));
+  color: var(--message-primary, var(--WDS-content-default, var(--primary, #111b21)));
+  font-size: var(--wap-bubble-font, 14.2px);
+  line-height: 19px;
+  box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+  cursor: pointer;
+  opacity: 0.85;
+  outline: 1px dashed var(--WDS-systems-bubble-content-deemphasized, var(--bubble-meta, rgba(0, 0, 0, 0.35)));
+  outline-offset: -1px;
+}
+.wap-ghost:hover, .wap-ghost:focus-visible { opacity: 1; }
+.wap-ghost-text { white-space: pre-wrap; word-wrap: break-word; }
+.wap-ghost-spacer { display: inline-block; width: 128px; }
+.wap-ghost-meta {
+  position: absolute;
+  right: 7px;
+  bottom: 3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  line-height: 15px;
+  color: var(--WDS-systems-bubble-content-deemphasized, var(--bubble-meta, rgba(17, 27, 33, 0.6)));
+  white-space: nowrap;
+}
+.wap-ghost-problem .wap-ghost-meta { color: var(--WDS-content-negative, var(--danger, #ea0038)); }
+
+/* ---- sohbet listesi: "Zamanlanmış" bölümü (WhatsApp satırları gibi) ---- */
+.wap-sched-list {
+  flex: 0 0 auto;
+  border-bottom: 1px solid var(--WDS-border-default, var(--border-list, rgba(134, 150, 160, 0.15)));
+  color: var(--WDS-content-default, var(--primary, #111b21));
+  padding-bottom: 4px;
+}
+.wap-sched-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px 6px var(--wap-row-padl, 13px);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--WDS-accent, var(--teal, #00a884));
+}
+.wap-sched-head svg { flex: 0 0 auto; }
+.wap-sched-count {
+  margin-left: auto;
+  font-weight: 400;
+  color: var(--WDS-content-deemphasized, var(--secondary, #667781));
+}
+.wap-sched-row {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  height: var(--wap-row-h, 72px);
+  padding: 0 15px 0 var(--wap-row-padl, 13px);
+  border-radius: 12px;
+  cursor: pointer;
+}
+.wap-sched-row:hover, .wap-sched-row:focus-visible { background: var(--WDS-surface-highlight, rgba(134, 150, 160, 0.12)); outline: none; }
+.wap-sched-avatar {
+  flex: 0 0 auto;
+  width: var(--wap-row-avatar, 49px);
+  height: var(--wap-row-avatar, 49px);
+  border-radius: 50%;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: var(--WDS-surface-elevated-emphasized, var(--panel-header-background, #dfe5e7));
+}
+.wap-sched-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.wap-sched-initial { font-size: 18px; color: var(--WDS-content-deemphasized, var(--secondary, #667781)); }
+.wap-sched-body { flex: 1; min-width: 0; }
+.wap-sched-top, .wap-sched-bottom { display: flex; align-items: center; gap: 6px; }
+.wap-sched-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--wap-row-name-size, 17px);
+  font-weight: var(--wap-row-name-weight, 400);
+}
+.wap-sched-time { flex: 0 0 auto; font-size: 12px; color: var(--WDS-accent, var(--teal, #00a884)); }
+.wap-sched-bad { color: var(--WDS-content-negative, var(--danger, #ea0038)); }
+.wap-sched-bottom { margin-top: 2px; }
+.wap-sched-snip {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--wap-row-snip-size, 14px);
+  color: var(--WDS-content-deemphasized, var(--secondary, #667781));
+}
+.wap-sched-snip svg { flex: 0 0 auto; }
+.wap-sched-snip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wap-sched-badge {
+  flex: 0 0 auto;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  background: var(--WDS-surface-elevated-emphasized, var(--panel-header-background, #f0f2f5));
+  color: var(--WDS-content-deemphasized, var(--secondary, #667781));
+}
+.wap-sched-more {
+  display: block;
+  margin: 2px 0 0;
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  padding: 8px 16px 8px var(--wap-row-padl, 13px);
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  font-size: 13.5px;
+  color: var(--WDS-content-deemphasized, var(--secondary, #667781));
+  cursor: pointer;
+}
+.wap-sched-more:hover { background: var(--WDS-surface-highlight, rgba(134, 150, 160, 0.12)); }
+
+/* gerçek liste satırında adın yanındaki saat */
+.wap-row-clock {
+  display: inline-flex;
+  vertical-align: middle;
+  margin-left: 6px;
+  color: var(--WDS-accent, var(--teal, #00a884));
+}
+
+/* ---- başlık çubuğu (pencere çerçevesiz; her modda) ---- */
+html.wap-bar #app {
+  top: var(--wap-bar-h, 30px) !important;
+  height: calc(100% - var(--wap-bar-h, 30px)) !important;
+}
+html.wap-phone.wap-mini [data-wap-split] {
+  margin-left: calc(-1 * var(--wap-rail-w, 64px)) !important;
+  width: calc(100% + var(--wap-rail-w, 64px)) !important;
+  max-width: none !important;
+}
+.wap-minibar {
+  position: fixed;
+  z-index: 2147483003;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  display: flex;
+  align-items: stretch;
+  padding: 0 0 0 12px;
+  background: var(--WDS-surface-default, var(--panel-header-background, #f0f2f5));
+  color: var(--WDS-content-deemphasized, var(--secondary, #667781));
+  border-bottom: 1px solid var(--WDS-surface-highlight, rgba(134, 150, 160, 0.15));
+  font-size: 12.5px;
+  user-select: none;
+  cursor: default;
+  box-sizing: border-box;
+}
+.wap-minibar-title {
+  flex: 1;
+  min-width: 0;
+  align-self: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.wap-minibar-btn {
+  width: 36px;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  display: grid;
+  place-items: center;
+  cursor: default;
+}
+.wap-minibar-btn[hidden] { display: none; }
+.wap-minibar-btn:hover { background: var(--WDS-surface-highlight, rgba(134, 150, 160, 0.15)); color: var(--WDS-content-default, var(--primary, #111b21)); }
+.wap-minibar-btn:active { opacity: 0.75; }
+.wap-minibar-btn:focus-visible { outline: 1px solid var(--WDS-accent, #00a884); outline-offset: -2px; }
+.wap-bar-pin.on, .wap-bar-pin.on:hover { color: var(--WDS-accent, var(--teal, #00a884)); }
+.wap-bar-pin.on svg { fill: currentColor; }
+.wap-bar-pin:not(.on) svg { fill: none; }
+.wap-minibar-sep { width: 1px; margin: 8px 4px; background: var(--WDS-surface-highlight, rgba(134, 150, 160, 0.25)); }
+.wap-cap { width: 46px; }
+.wap-cap-close:hover { background: #c42b1c; color: #fff; }
+.wap-cap-close:active { background: #c42b1c; color: #fff; opacity: 0.85; }
+html.wap-mini .wap-cap { width: 40px; }
+
+/* medya paneli açıkken telefon modunun geri düğmesi panelin kapat düğmesiyle çakışmasın */
+html.wap-media-open #wap-back { display: none !important; }
+
+/* ---- medya toplayıcı: sohbetin üstünü kaplayan WhatsApp paneli gibi ---- */
+.wap-media {
+  position: fixed;
+  z-index: 2147482990;
+  display: flex;
+  flex-direction: column;
+  background: var(--WDS-surface-default, var(--panel-background, #fff));
+  color: var(--WDS-content-default, var(--primary, #111b21));
+  font-size: 14.2px;
+}
+.wap-media .wap-panel-head { padding: 12px 12px 4px 10px; }
+.wap-media-tabs { padding: 4px 16px 10px; margin-top: 0; }
+.wap-media-grid {
+  flex: 1;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: 4px;
+  padding: 0 16px 12px;
+  align-content: start;
+}
+.wap-media-docs { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding: 0 16px 12px; }
+.wap-media-cell {
+  position: relative;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: var(--WDS-surface-elevated-emphasized, var(--panel-header-background, #f0f2f5));
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  overflow: hidden;
+}
+.wap-media-grid .wap-media-cell { aspect-ratio: 1; border-radius: 4px; }
+.wap-media-grid .wap-media-cell img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.wap-media-docs .wap-media-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 44px 12px 14px;
+  border-radius: 10px;
+  text-align: left;
+  color: var(--WDS-content-default, var(--primary, #111b21));
+}
+.wap-media-docname { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wap-media-play {
+  position: absolute;
+  left: 6px;
+  bottom: 4px;
+  font-size: 12px;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+.wap-media-check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  background: rgba(0, 0, 0, 0.25);
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+}
+.wap-media-docs .wap-media-check { top: 50%; transform: translateY(-50%); right: 14px; border-color: var(--WDS-content-deemphasized, #8696a0); background: transparent; box-shadow: none; }
+.wap-media-cell:hover .wap-media-check { opacity: 1; }
+.wap-media-cell[aria-pressed="true"] .wap-media-check {
+  opacity: 1;
+  background: var(--WDS-accent, #00a884);
+  border-color: var(--WDS-accent, #00a884);
+}
+.wap-media-grid .wap-media-cell[aria-pressed="true"] img { transform: scale(0.9); border-radius: 4px; }
+.wap-media-ok {
+  position: absolute;
+  left: 6px;
+  top: 4px;
+  font-size: 13px;
+  color: var(--WDS-accent, #00a884);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+.wap-media-docs .wap-media-ok { position: static; text-shadow: none; }
+.wap-media-err { outline: 2px solid var(--WDS-content-negative, #ea0038); outline-offset: -2px; }
+.wap-media-empty { grid-column: 1 / -1; padding: 32px 8px; text-align: center; color: var(--WDS-content-deemphasized, var(--secondary, #667781)); font-size: 14px; }
+.wap-media-foot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--WDS-surface-highlight, rgba(134, 150, 160, 0.15));
+}
+.wap-btn-text {
+  border: 0;
+  background: transparent;
+  padding: 8px 4px;
+  font: inherit;
+  font-weight: 500;
+  color: var(--WDS-accent, var(--teal, #00a884));
+  cursor: pointer;
+}
+.wap-btn-text:hover { text-decoration: underline; }
+.wap-fab-media { z-index: 2147483000; }

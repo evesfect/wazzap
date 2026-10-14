@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-schedules"
+description = "Enables the schedules command without any pre-configured scope."
+commands.allow = ["schedules"]
+
+[[permission]]
+identifier = "deny-schedules"
+description = "Denies the schedules command without any pre-configured scope."
+commands.deny = ["schedules"]

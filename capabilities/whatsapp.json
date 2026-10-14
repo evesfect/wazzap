@@ -1,0 +1,21 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "whatsapp-page",
+  "description": "WhatsApp Web sayfası: yalnızca köprü komutları.",
+  "windows": [
+    "main"
+  ],
+  "local": false,
+  "remote": {
+    "urls": [
+      "https://web.whatsapp.com",
+      "https://web.whatsapp.com/*"
+    ]
+  },
+  "permissions": [
+    "allow-wa-event",
+    "allow-wa-settings",
+    "allow-wa-schedule",
+    "allow-wa-media"
+  ]
+}

@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-wa-event"
+description = "Enables the wa_event command without any pre-configured scope."
+commands.allow = ["wa_event"]
+
+[[permission]]
+identifier = "deny-wa-event"
+description = "Denies the wa_event command without any pre-configured scope."
+commands.deny = ["wa_event"]

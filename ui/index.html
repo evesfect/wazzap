@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<!-- Tellal ayarları — ev stili üzerine. -->
+<html lang="tr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tellal · Ayarlar</title>
+<style>
+  @font-face{font-family:Inter; font-style:normal; font-weight:100 900; font-display:swap;
+    src:url(fonts/inter-latin-wght-normal.woff2) format('woff2');
+    unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+  @font-face{font-family:Inter; font-style:normal; font-weight:100 900; font-display:swap;
+    src:url(fonts/inter-latin-ext-wght-normal.woff2) format('woff2');
+    unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+
+  :root{
+    --bg:#000000; --panel:#000000; --panel2:#101010; --line:#2A2A2A;
+    --ink:#FFFFFF; --dim:#8A8A8A; --chalk:#EC2500; --radius:6px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:Inter,system-ui,-apple-system,sans-serif;
+    font-size:14px; line-height:1.5; letter-spacing:-.025em;
+    font-feature-settings:"tnum" 1;
+  }
+  .shell{display:grid; grid-template-columns:392px 1fr; height:100vh}
+  @media (max-width:900px){ .shell{grid-template-columns:1fr; height:auto} }
+
+  /* ---- sol ray ---- */
+  .rail{border-right:1px solid var(--line); overflow-y:auto; background:var(--panel)}
+  .masthead{padding:20px 22px 16px; border-bottom:1px solid var(--line)}
+  .masthead h1{margin:0; font-size:34px; line-height:1; font-weight:600; letter-spacing:-.055em}
+  .masthead p{margin:12px 0 0; color:var(--dim); font-size:12.5px}
+
+  details.grp{border-bottom:1px solid var(--line)}
+  details.grp>summary{
+    padding:13px 22px; cursor:pointer; font-weight:500; font-size:13.5px;
+    list-style:none; display:flex; justify-content:space-between; align-items:center;
+  }
+  details.grp>summary::-webkit-details-marker{display:none}
+  details.grp>summary::after{content:"+"; color:var(--dim); font-size:15px}
+  details.grp[open]>summary::after{content:"–"}
+  details.grp>summary:hover{background:var(--panel2)}
+  .body{padding:2px 22px 20px}
+
+  .chips{display:flex; flex-wrap:wrap; gap:6px}
+  .chip{
+    background:var(--panel2); border:1px solid var(--line); color:var(--ink);
+    border-radius:8px; padding:5px 10px; font:inherit; font-size:12.5px; cursor:pointer;
+  }
+  .chip:hover{border-color:var(--dim)}
+  .chip[aria-pressed="true"]{background:var(--chalk); border-color:var(--chalk); color:#000}
+  .chip .sw{display:inline-flex; gap:0; margin-right:6px; vertical-align:-1px}
+  .chip .sw i{width:6px; height:11px; display:block}
+
+  .row{display:flex; align-items:center; gap:10px; margin:11px 0}
+  .row label{flex:0 0 108px; color:var(--dim); font-size:12.5px}
+  .row output{flex:0 0 52px; text-align:right; font-size:12.5px; color:var(--ink)}
+  input[type=range]{flex:1; accent-color:var(--chalk); min-width:0}
+  select,input[type=number],input[type=text],textarea{
+    background:var(--panel2); color:var(--ink); border:1px solid var(--line);
+    border-radius:var(--radius); padding:5px 7px; font:inherit; font-size:13px;
+  }
+  select{flex:1}
+  textarea{width:100%; min-height:110px; resize:vertical; letter-spacing:0;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:11.5px; line-height:1.6}
+
+  .check{display:flex; align-items:center; gap:9px; margin:9px 0; color:var(--dim); font-size:12.5px; cursor:pointer}
+  .check input{accent-color:var(--chalk); width:15px; height:15px; margin:0}
+
+  .slots{display:grid; grid-template-columns:1fr 1fr; gap:8px 10px; margin-top:12px}
+  .slotcell{display:flex; align-items:center; gap:7px; min-width:0}
+  .slotcell .lbl{color:var(--dim); font-size:11.5px; flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .slotcell .code2{color:var(--dim); font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:10.5px; letter-spacing:0}
+  .swatch{
+    width:30px; height:26px; flex:0 0 auto; border:1px solid var(--line);
+    border-radius:7px; cursor:pointer; padding:0;
+  }
+  .swatch:hover{border-color:var(--ink)}
+  .swatch[aria-expanded="true"]{border-color:var(--chalk); box-shadow:0 0 0 1px var(--chalk)}
+
+  /* ---- renk seçici ---- */
+  .pick{
+    position:fixed; z-index:60; width:246px; background:#000;
+    border:1px solid var(--line); border-radius:12px; padding:11px;
+  }
+  .pick[hidden]{display:none}
+  .pick-sv{position:relative; height:134px; border-radius:8px; cursor:crosshair; touch-action:none}
+  .pick-ring{
+    position:absolute; width:15px; height:15px; border:2px solid #fff; border-radius:50%;
+    transform:translate(-50%,-50%); pointer-events:none; box-shadow:0 0 0 1.5px rgba(0,0,0,.55);
+  }
+  .pick-mid{display:flex; align-items:center; gap:9px; margin-top:11px}
+  .pick-eye{
+    width:28px; height:28px; flex:0 0 auto; display:grid; place-items:center; padding:0;
+    background:none; border:1px solid var(--line); border-radius:8px; color:var(--ink); cursor:pointer;
+  }
+  .pick-eye:hover{border-color:var(--ink)}
+  .pick-dot{width:26px; height:26px; flex:0 0 auto; border-radius:50%; border:1px solid var(--line)}
+  .pick-hue{
+    position:relative; flex:1; height:13px; border-radius:7px; cursor:pointer; touch-action:none;
+    background:linear-gradient(to right,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00);
+  }
+  .pick-knob{
+    position:absolute; top:50%; width:15px; height:15px; border:2px solid #fff; border-radius:50%;
+    transform:translate(-50%,-50%); pointer-events:none; box-shadow:0 0 0 1.5px rgba(0,0,0,.55);
+  }
+  .pick-fields{display:grid; grid-template-columns:1.7fr 1fr 1fr 1fr; gap:7px; margin-top:11px}
+  .pick-fields label{display:block; text-align:center}
+  .pick-fields input{
+    width:100%; text-align:center; padding:6px 2px; letter-spacing:0;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:11.5px;
+  }
+  .pick-fields input.bad{border-color:var(--chalk)}
+  .pick-fields span{display:block; color:var(--dim); font-size:10.5px; margin-top:4px}
+  :focus-visible{outline:2px solid var(--chalk); outline-offset:2px}
+
+  .btn{
+    background:var(--panel2); border:1px solid var(--line); color:var(--ink);
+    border-radius:8px; padding:8px 13px; font:inherit; font-size:13px; cursor:pointer;
+  }
+  .btn:hover{border-color:var(--dim)}
+  .btn.key{background:var(--chalk); border-color:var(--chalk); color:#000; font-weight:600}
+  .btn.key:hover{filter:brightness(1.08)}
+  .btn[disabled]{opacity:.5; cursor:default}
+  .btns{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
+
+  .note{color:var(--dim); font-size:12px; margin:10px 0 0}
+  .code{
+    background:#0A0A0A; border:1px solid var(--line); border-radius:var(--radius);
+    padding:9px 10px; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:11.5px; line-height:1.65; color:var(--dim); word-break:break-all; margin-top:10px;
+  }
+  .code b{color:var(--ink); font-weight:500}
+  .colophon{padding:18px 22px 26px; color:#5C5C5C; font-size:11.5px; line-height:1.6}
+  .colophon strong{color:var(--dim); font-weight:500}
+
+  #savedChips:not(:empty){margin-top:6px}
+  .updtext{flex:1; font-size:12.5px; color:var(--ink)}
+
+  /* ---- zamanlı mesaj listesi ---- */
+  .sitem{padding:10px 0; border-bottom:1px solid var(--line)}
+  .sitem:first-child{padding-top:2px}
+  .stop{display:flex; justify-content:space-between; gap:10px; align-items:baseline}
+  .schat{font-weight:500; font-size:13px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .stime{color:var(--dim); font-size:12px; flex:0 0 auto}
+  .stext{color:var(--ink); font-size:12.5px; margin-top:3px; white-space:pre-wrap; overflow:hidden;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical}
+  .sfoot{display:flex; align-items:center; gap:8px; margin-top:6px}
+  .sstate{color:var(--dim); font-size:12px; margin-right:auto; min-width:0}
+  .sbtn{background:none; border:1px solid var(--line); color:var(--ink); border-radius:7px; padding:3px 9px; font:inherit; font-size:12px; cursor:pointer; white-space:nowrap; flex:0 0 auto}
+  .sbtn:hover{border-color:var(--dim)}
+  .sempty{color:var(--dim); font-size:12.5px}
+  .shead{color:var(--dim); font-size:11.5px; margin:12px 0 2px}
+
+  /* ---- sahne ---- */
+  .stage{padding:26px; display:flex; flex-direction:column; gap:14px; min-width:0; height:100vh}
+  .viewwrap{flex:1; min-height:0; display:flex; align-items:center; justify-content:center}
+  .surface{position:relative; background:#0A0A0A; border-radius:2px; overflow:hidden}
+  .stagebar{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+  .stagebar .meta{color:var(--dim); font-size:12.5px; margin-right:auto}
+  #status{color:var(--chalk); font-size:12.5px}
+  @media (max-width:900px){
+    .stage{padding:16px; height:auto}
+    .viewwrap{height:min(90vw,70vh)}
+  }
+
+  /* ---- önizleme: WhatsApp'ın sade bir taslağı, tema renkleriyle ---- */
+  .wa{
+    position:absolute; left:0; top:0; transform-origin:0 0;
+    display:grid; grid-template-columns:56px 320px 1fr;
+    background:var(--p-bg); color:var(--p-ink); font-family:var(--p-font);
+    font-size:14px; letter-spacing:0; line-height:1.35;
+  }
+  .wa[data-view="phone"]{grid-template-columns:1fr}
+  .wa[data-view="phone"] .wa-rail,.wa[data-view="phone"] .wa-list{display:none}
+  .wa-rail{background:var(--p-panel); border-right:1px solid var(--p-line); display:flex; flex-direction:column; align-items:center; gap:18px; padding-top:18px}
+  .wa-rail i{width:22px; height:22px; border-radius:6px; border:2px solid var(--p-dim)}
+  .wa-rail i.on{border-color:var(--p-ink)}
+  .wa-list{border-right:1px solid var(--p-line); display:flex; flex-direction:column; min-width:0; background:var(--p-bg)}
+  .wa-head{height:60px; display:flex; align-items:center; gap:12px; padding:0 16px; background:var(--p-panel); flex:0 0 auto}
+  .wa-head .t{font-weight:600; font-size:19px}
+  .wa-search{margin:10px 12px; border-radius:8px; background:var(--p-panel); color:var(--p-dim); padding:8px 12px; font-size:13px}
+  .wa-filters{display:flex; gap:6px; padding:0 12px 8px}
+  .wa-filters span{font-size:12.5px; padding:4px 11px; border-radius:16px; background:var(--p-panel); color:var(--p-dim)}
+  .wa-filters span.on{background:var(--p-accent); color:var(--p-accent-ink)}
+  .wa-row{display:flex; align-items:center; gap:12px; padding:9px 14px; border-bottom:1px solid var(--p-line)}
+  .wa-row.sel{background:var(--p-panel)}
+  .av{width:46px; height:46px; border-radius:50%; flex:0 0 auto; background:var(--p-line)}
+  .av.s{width:38px; height:38px}
+  .wa-row .txt{flex:1; min-width:0}
+  .wa-row .n{display:flex; justify-content:space-between; gap:8px}
+  .wa-row .tm{font-size:11.5px; color:var(--p-dim)}
+  .wa-row .tm.hot{color:var(--p-accent)}
+  .wa-row .sn{color:var(--p-dim); font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; justify-content:space-between; gap:8px}
+  .badge{background:var(--p-accent); color:var(--p-accent-ink); border-radius:10px; min-width:19px; height:19px; font-size:11.5px; display:inline-grid; place-items:center; padding:0 5px; font-weight:600}
+  .wa-chat{display:flex; flex-direction:column; min-width:0; background:var(--p-chat); background-image:var(--p-wall); background-size:cover; background-position:center}
+  .wa-chat .wa-head .back{display:none; width:20px; height:20px; color:var(--p-ink)}
+  .wa[data-view="phone"] .wa-chat .wa-head .back{display:block}
+  .wa-chat .wa-head .st{font-size:12px; color:var(--p-dim)}
+  .msgs{flex:1; padding:18px 7%; display:flex; flex-direction:column; gap:6px; overflow:hidden}
+  .wa[data-view="phone"] .msgs{padding:14px 12px}
+  .day{align-self:center; font-size:12px; color:var(--p-dim); background:var(--p-panel); padding:4px 10px; border-radius:8px; margin:6px 0}
+  .b{max-width:68%; padding:6px 9px 7px; position:relative; border-radius:var(--p-radius); font-size:14px}
+  .b.o{align-self:flex-end; background:var(--p-out); color:var(--p-out-ink)}
+  .b.i{align-self:flex-start; background:var(--p-in); color:var(--p-in-ink)}
+  .b .m{font-size:11px; opacity:.6; margin-left:8px; float:right; margin-top:5px}
+  .b .q{background:rgba(127,127,127,.16); border-left:3px solid var(--p-accent); border-radius:calc(var(--p-radius) * .6); padding:4px 8px; margin-bottom:5px; font-size:12.5px}
+  .b.tail.o{border-top-right-radius:0}
+  .b.tail.i{border-top-left-radius:0}
+  .b.tail.o::after,.b.tail.i::after{content:""; position:absolute; top:0; width:8px; height:13px; background:inherit}
+  .b.tail.o::after{right:-8px; clip-path:polygon(0 0,100% 0,0 100%)}
+  .b.tail.i::after{left:-8px; clip-path:polygon(0 0,100% 0,100% 100%)}
+  .wa-foot{display:flex; align-items:center; gap:10px; padding:9px 14px; background:var(--p-panel)}
+  .wa-foot .in{flex:1; background:var(--p-bg); color:var(--p-dim); border-radius:8px; padding:9px 12px; font-size:13.5px}
+  .wa-foot .send{width:38px; height:38px; border-radius:50%; background:var(--p-accent); display:grid; place-items:center}
+  .wa-foot .send svg{color:var(--p-accent-ink)}
+</style>
+
+<div class="shell">
+<div class="rail">
+  <div class="masthead">
+    <h1>Tellal</h1>
+    <p>Temayı seç, renkleri ayarla, düzeni WhatsApp'a uygula.</p>
+  </div>
+
+  <details class="grp" open>
+    <summary>Tema</summary>
+    <div class="body">
+      <div class="chips" id="presetChips"></div>
+      <div class="chips" id="savedChips"></div>
+      <div class="row"><label for="themeName">Temayı kaydet</label>
+        <input type="text" id="themeName" placeholder="Tema adı" maxlength="40" spellcheck="false" style="flex:1;min-width:0">
+        <button class="btn" id="saveTheme">Kaydet</button>
+      </div>
+      <div class="btns">
+        <button class="btn" id="exportTheme">Dışa aktar</button>
+        <button class="btn" id="importTheme">İçe aktar</button>
+        <button class="btn" id="deleteTheme" hidden>Kaydedilen temayı sil</button>
+      </div>
+      <p class="note">WhatsApp'ın kendi ayarlarından Koyu temayı seçersen renk eşleşmesi en temiz sonucu verir.</p>
+    </div>
+  </details>
+
+  <details class="grp" open>
+    <summary>Renkler</summary>
+    <div class="body">
+      <div class="slots" id="slots"></div>
+    </div>
+  </details>
+
+  <details class="grp" open>
+    <summary>Baloncuk ve yazı</summary>
+    <div class="body">
+      <div class="row"><label for="radius">Köşe</label>
+        <input type="range" id="radius" min="0" max="28" value="12"><output id="radiusO"></output></div>
+      <label class="check"><input type="checkbox" id="hideTails"> Baloncuk kuyruklarını gizle</label>
+      <div class="row"><label for="font">Yazı tipi</label>
+        <select id="font">
+          <option value="Inter">Inter — ev stili</option>
+          <option value="Segoe UI">Segoe UI — Windows</option>
+          <option value="WhatsApp">WhatsApp'ın kendi yazı tipi</option>
+        </select>
+      </div>
+      <div class="row" style="align-items:flex-start"><label style="padding-top:5px">Duvar kağıdı</label>
+        <div class="chips" id="wallChips" style="flex:1"></div>
+      </div>
+      <input type="file" id="wallFile" accept="image/*" hidden>
+    </div>
+  </details>
+
+  <details class="grp" open>
+    <summary>Düzen</summary>
+    <div class="body">
+      <div class="chips" id="modeChips"></div>
+      <div class="row"><label for="zoom">Normal mod</label>
+        <input type="range" id="zoom" min="50" max="200" step="5"><output id="zoomO"></output></div>
+      <div class="row"><label for="phoneZoom">Telefon modu</label>
+        <input type="range" id="phoneZoom" min="50" max="200" step="5"><output id="phoneZoomO"></output></div>
+      <div class="row"><label for="phoneBreakpoint">Tek panel eşiği</label>
+        <input type="range" id="phoneBreakpoint" min="320" max="1200" step="10"><output id="phoneBreakpointO"></output></div>
+      <label class="check"><input type="checkbox" id="phoneSnapRight"> Telefon modunda sağ kenara yapış</label>
+      <label class="check"><input type="checkbox" id="phoneOnTop"> Telefon modunda her zaman üstte</label>
+      <label class="check"><input type="checkbox" id="alwaysOnTop"> Normal modda her zaman üstte</label>
+      <p class="note">Pencere bu genişliğin altına inince liste ve sohbet tek panelde, sırayla açılır.</p>
+    </div>
+  </details>
+
+  <details class="grp" open>
+    <summary>Zamanlı mesajlar</summary>
+    <div class="body">
+      <div id="sched"></div>
+      <p class="note">Bir sohbette sol alttaki saat düğmesine ya da Ctrl + Shift + Enter'a bas. Mesaj zamanında gitsin diye Tellal açık ve bilgisayar uyanık olmalı; 10 dakikadan fazla geciken mesaj gönderilmez, burada bekler.</p>
+    </div>
+  </details>
+
+  <details class="grp" open>
+    <summary>Masaüstü</summary>
+    <div class="body">
+      <label class="check"><input type="checkbox" id="closeToTray"> Kapatınca tepside çalışmaya devam etsin</label>
+      <label class="check"><input type="checkbox" id="autostart"> Windows açılınca arka planda başlasın</label>
+      <label class="check"><input type="checkbox" id="notifications"> Bildirim göster</label>
+      <label class="check"><input type="checkbox" id="notifyPreview"> Bildirimde mesajın kendisini göster</label>
+      <div class="code" id="keys">
+        <b>Ctrl + Shift + Boşluk</b> her yerden göster / gizle<br>
+        <b>Ctrl + 1</b> telefon · <b>Ctrl + 2</b> normal · <b>Ctrl + 3</b> kompakt<br>
+        <b>Ctrl + T</b> her zaman üstte · <b>Ctrl + ,</b> bu pencere<br>
+        <b>Ctrl + + / − / 0</b> yakınlaştırma · <b>Esc</b> sohbetten listeye<br>
+        <b>Ctrl + Shift + Enter</b> yazı kutusundaki mesajı zamanla
+      </div>
+    </div>
+  </details>
+
+  <details class="grp" open>
+    <summary>Gelişmiş</summary>
+    <div class="body">
+      <label class="check" for="customCss" style="cursor:default">Özel CSS — WhatsApp sayfasına en son eklenir</label>
+      <textarea id="customCss" spellcheck="false" placeholder="#main header { border-bottom: 1px solid var(--wap-line) !important; }"></textarea>
+      <div class="btns">
+        <button class="btn" id="diagBtn">Tanılama dosyası oluştur</button>
+        <button class="btn" id="folderBtn">Veri klasörünü aç</button>
+      </div>
+      <div class="row"><label>Güncelleme</label><span id="updText" class="updtext"></span></div>
+      <div class="btns">
+        <button class="btn" id="updCheck">Denetle</button>
+        <button class="btn key" id="updInstall" hidden>Güncellemeyi kur</button>
+      </div>
+      <p class="note" id="diagNote">Tanılama dosyası yalnızca renk değişkenlerini ve sayfa yapısını içerir; mesaj, kişi adı ya da numara yazılmaz. Tema bir yerde tutmazsa bu dosyayı paylaş.</p>
+    </div>
+  </details>
+
+  <div class="colophon">
+    Tellal · <strong>kvbilai</strong> · MIT lisansı<br>
+    WhatsApp veya Meta ile bağlantılı değildir.<br>
+    <span id="ver"></span>
+  </div>
+</div>
+
+<div class="stage">
+  <div class="viewwrap" id="viewwrap">
+    <div class="surface" id="surface">
+      <div class="wa" id="wa" data-view="desktop">
+        <div class="wa-rail"><i class="on"></i><i></i><i></i><i></i></div>
+        <div class="wa-list">
+          <div class="wa-head"><span class="t">Sohbetler</span></div>
+          <div class="wa-search">Ara veya yeni sohbet başlat</div>
+          <div class="wa-filters"><span class="on">Tümü</span><span>Okunmamış</span><span>Gruplar</span></div>
+          <div class="wa-row sel"><div class="av"></div><div class="txt"><div class="n"><span>Aura ekip</span><span class="tm hot">18:04</span></div><div class="sn"><span>Kostümler hazır mı?</span><span class="badge">3</span></div></div></div>
+          <div class="wa-row"><div class="av"></div><div class="txt"><div class="n"><span>Stüdyo</span><span class="tm">17:40</span></div><div class="sn"><span>Kayıt saatini teyit ettim</span></div></div></div>
+          <div class="wa-row"><div class="av"></div><div class="txt"><div class="n"><span>Radikal</span><span class="tm">Dün</span></div><div class="sn"><span>Kapak son hali çok iyi olmuş</span></div></div></div>
+          <div class="wa-row"><div class="av"></div><div class="txt"><div class="n"><span>Matbaa</span><span class="tm">Pzt</span></div><div class="sn"><span>Prova baskı hazır</span></div></div></div>
+          <div class="wa-row"><div class="av"></div><div class="txt"><div class="n"><span>Annem</span><span class="tm">Paz</span></div><div class="sn"><span>Akşama geliyor musun?</span></div></div></div>
+        </div>
+        <div class="wa-chat">
+          <div class="wa-head">
+            <svg class="back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            <div class="av s"></div><div><div>Aura ekip</div><div class="st">yazıyor…</div></div>
+          </div>
+          <div class="msgs">
+            <span class="day">Bugün</span>
+            <div class="b i tail">Prova 18:00'de, geç kalmayın<span class="m">17:52</span></div>
+            <div class="b o tail">Geldim, stüdyo kapısındayım<span class="m">17:58</span></div>
+            <div class="b i tail"><div class="q">Kostümler</div>Kostümler hazır mı?<span class="m">18:03</span></div>
+            <div class="b o tail">Hazır, krom ceketler de geldi<span class="m">18:04</span></div>
+            <div class="b o">Fotoğrafını atıyorum şimdi<span class="m">18:04</span></div>
+          </div>
+          <div class="wa-foot"><div class="in">Bir mesaj yazın</div><div class="send"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 20.5 21 12 3 3.5l.01 6.6L15 12 3.01 13.9z"/></svg></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="stagebar">
+    <span class="meta" id="meta"></span>
+    <div class="chips" id="viewChips">
+      <button class="chip" data-v="desktop" aria-pressed="true">Masaüstü</button>
+      <button class="chip" data-v="phone" aria-pressed="false">Telefon</button>
+    </div>
+    <span id="status"></span>
+  </div>
+</div>
+</div>
+
+<div class="pick" id="pick" hidden role="dialog" aria-label="Renk seçici">
+  <div class="pick-sv" id="pkSV"><span class="pick-ring" id="pkRing"></span></div>
+  <div class="pick-mid">
+    <button class="pick-eye" id="pkEye" type="button" aria-label="Ekrandan renk al">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+    </button>
+    <span class="pick-dot" id="pkDot"></span>
+    <div class="pick-hue" id="pkHue"><span class="pick-knob" id="pkKnob"></span></div>
+  </div>
+  <div class="pick-fields">
+    <label><input type="text" id="pkHex" spellcheck="false" maxlength="7" aria-label="Hex kodu"><span>HEX</span></label>
+    <label><input type="text" id="pkR" inputmode="numeric" aria-label="Kırmızı"><span>R</span></label>
+    <label><input type="text" id="pkG" inputmode="numeric" aria-label="Yeşil"><span>G</span></label>
+    <label><input type="text" id="pkB" inputmode="numeric" aria-label="Mavi"><span>B</span></label>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const clamp = (v,a,b) => v < a ? a : v > b ? b : v;
+
+/* ================= Tauri köprüsü ================= */
+const T = window.__TAURI_INTERNALS__;
+const invoke = (cmd, args) => T ? T.invoke(cmd, args || {}) : Promise.reject(new Error('Tauri yok'));
+function listen(event, cb){
+  if(!T) return;
+  const handler = T.transformCallback(e => cb(e.payload));
+  invoke('plugin:event|listen', { event, target:{ kind:'Any' }, handler }).catch(() => {});
+}
+
+/* ================= hazır temalar ================= */
+const PRESETS = [
+  { name:'Siyah', theme:{ bg:'#000000', panel:'#101010', line:'#2A2A2A', dim:'#8A8A8A', ink:'#FFFFFF',
+    accent:'#EC2500', accentInk:'#000000', outBubble:'#1F1F1F', outInk:'#FFFFFF', inBubble:'#101010', inInk:'#FFFFFF',
+    chatBg:'#000000', wallpaper:'', font:'Inter', radius:12, hideTails:true } },
+  { name:'Chrome', theme:{ bg:'#0B0C0E', panel:'#17191D', line:'#2E3238', dim:'#9AA3AE', ink:'#F2F5F8',
+    accent:'#C9D3DE', accentInk:'#000000', outBubble:'#3A414B', outInk:'#FFFFFF', inBubble:'#1A1D22', inInk:'#F2F5F8',
+    chatBg:'#0B0C0E', wallpaper:'linear-gradient(160deg, #2A2F36 0%, #0B0C0E 42%, #1C2026 68%, #3A414B 100%)',
+    font:'Inter', radius:16, hideTails:true } },
+  { name:'Y2K', theme:{ bg:'#0A0012', panel:'#170827', line:'#34184F', dim:'#B79AD6', ink:'#FFF4FD',
+    accent:'#FF4FD8', accentInk:'#0A0012', outBubble:'#6A2AE0', outInk:'#FFFFFF', inBubble:'#1F0D36', inInk:'#FFF4FD',
+    chatBg:'#0A0012', wallpaper:'radial-gradient(120% 80% at 0% 0%, #3B0A5E 0%, rgba(59,10,94,0) 60%), radial-gradient(120% 80% at 100% 100%, #062B4F 0%, rgba(6,43,79,0) 60%)',
+    font:'Inter', radius:20, hideTails:true } },
+  // Lacivert (Discord temasından): #2C358D → siyah → #2C358D. Vurgu aynı tonun açığı (siyahta okunsun).
+  { name:'Lacivert', theme:{ bg:'#000000', panel:'#080A1A', line:'#1C225A', dim:'#8C93C7', ink:'#FFFFFF',
+    accent:'#3D4ACA', accentInk:'#FFFFFF', outBubble:'#2C358D', outInk:'#FFFFFF', inBubble:'#0F122F', inInk:'#FFFFFF',
+    chatBg:'#000000', wallpaper:'linear-gradient(135deg, #2C358D 0%, #000000 32%, #000000 68%, #2C358D 100%)',
+    font:'Inter', radius:12, hideTails:true } },
+  { name:'Açık', theme:{ bg:'#FFFFFF', panel:'#F4F4F4', line:'#E2E2E2', dim:'#6B6B6B', ink:'#0A0A0A',
+    accent:'#EC2500', accentInk:'#FFFFFF', outBubble:'#EDEDED', outInk:'#0A0A0A', inBubble:'#FFFFFF', inInk:'#0A0A0A',
+    chatBg:'#F7F7F7', wallpaper:'', font:'Inter', radius:12, hideTails:true } },
+];
+const SLOTS = [
+  ['bg','Zemin'], ['panel','Panel'], ['line','Çizgi'], ['dim','Soluk yazı'],
+  ['ink','Yazı'], ['accent','Vurgu'], ['accentInk','Vurgu üstü yazı'], ['chatBg','Sohbet zemini'],
+  ['outBubble','Giden baloncuk'], ['outInk','Giden yazı'], ['inBubble','Gelen baloncuk'], ['inInk','Gelen yazı'],
+];
+
+/* ================= durum ================= */
+let S = null;          // Rust'tan gelen ayarlar
+let view = 'desktop';
+
+/* ================= renk matematiği ================= */
+function hex2rgb(h){
+  const v = parseInt(String(h).replace('#',''), 16);
+  return [(v>>16)&255, (v>>8)&255, v&255];
+}
+function normHex(v){
+  let h = String(v).trim().replace(/^#/, '');
+  if(/^[0-9a-fA-F]{3}$/.test(h)) h = h.split('').map(c => c + c).join('');
+  return /^[0-9a-fA-F]{6}$/.test(h) ? '#' + h.toUpperCase() : null;
+}
+const rgb2hex = ([r,g,b]) =>
+  '#' + [r,g,b].map(v => clamp(Math.round(v),0,255).toString(16).padStart(2,'0')).join('').toUpperCase();
+function rgb2hsv(r,g,b){
+  r/=255; g/=255; b/=255;
+  const mx = Math.max(r,g,b), mn = Math.min(r,g,b), d = mx - mn;
+  let h = 0;
+  if(d){
+    if(mx === r) h = ((g-b)/d) % 6;
+    else if(mx === g) h = (b-r)/d + 2;
+    else h = (r-g)/d + 4;
+    h *= 60; if(h < 0) h += 360;
+  }
+  return [h, mx ? d/mx : 0, mx];
+}
+function hsv2rgb(h,s,v){
+  const c = v*s, x = c*(1 - Math.abs((h/60) % 2 - 1)), m = v - c;
+  let p = [0,0,0];
+  if(h < 60) p = [c,x,0]; else if(h < 120) p = [x,c,0]; else if(h < 180) p = [0,c,x];
+  else if(h < 240) p = [0,x,c]; else if(h < 300) p = [x,0,c]; else p = [c,0,x];
+  return p.map(n => Math.round((n + m) * 255));
+}
+
+/* ================= renk seçici (ev stili, olduğu gibi) ================= */
+const PK = { h:0, s:1, v:1, cb:null, anchor:null };
+const pkEl = id => document.getElementById(id);
+
+function pkRender(fromField){
+  const rgb = hsv2rgb(PK.h, PK.s, PK.v), hex = rgb2hex(rgb);
+  pkEl('pkSV').style.background =
+    `linear-gradient(to top,#000,rgba(0,0,0,0)),linear-gradient(to right,#fff,rgba(255,255,255,0)),hsl(${PK.h},100%,50%)`;
+  const box = pkEl('pkSV').getBoundingClientRect();
+  pkEl('pkRing').style.left = (PK.s * box.width) + 'px';
+  pkEl('pkRing').style.top = ((1 - PK.v) * box.height) + 'px';
+  pkEl('pkKnob').style.left = (PK.h / 360 * 100) + '%';
+  pkEl('pkDot').style.background = hex;
+  if(fromField !== 'hex') pkEl('pkHex').value = hex;
+  if(fromField !== 'rgb'){
+    pkEl('pkR').value = rgb[0]; pkEl('pkG').value = rgb[1]; pkEl('pkB').value = rgb[2];
+  }
+  ['pkHex','pkR','pkG','pkB'].forEach(id => pkEl(id).classList.remove('bad'));
+  if(PK.cb) PK.cb(hex);
+}
+function pkOpen(anchor, hex, cb){
+  const [r,g,b] = hex2rgb(hex);
+  [PK.h, PK.s, PK.v] = rgb2hsv(r,g,b);
+  PK.cb = cb;
+  if(PK.anchor) PK.anchor.setAttribute('aria-expanded','false');
+  PK.anchor = anchor; anchor.setAttribute('aria-expanded','true');
+  const panel = pkEl('pick');
+  panel.hidden = false;
+  const a = anchor.getBoundingClientRect(), w = panel.offsetWidth, h = panel.offsetHeight;
+  panel.style.left = clamp(a.left, 8, innerWidth - w - 8) + 'px';
+  panel.style.top = (a.bottom + h + 8 > innerHeight ? Math.max(8, a.top - h - 6) : a.bottom + 6) + 'px';
+  pkRender();
+  pkEl('pkHex').focus(); pkEl('pkHex').select();
+}
+function pkClose(){
+  pkEl('pick').hidden = true;
+  if(PK.anchor) PK.anchor.setAttribute('aria-expanded','false');
+  PK.anchor = null; PK.cb = null;
+}
+function pkDrag(el, handler){
+  const move = e => { handler(e, el.getBoundingClientRect()); };
+  el.addEventListener('pointerdown', e => {
+    el.setPointerCapture(e.pointerId); move(e);
+    const up = () => { el.removeEventListener('pointermove', move); el.removeEventListener('pointerup', up); };
+    el.addEventListener('pointermove', move); el.addEventListener('pointerup', up);
+  });
+}
+function pkInit(){
+  pkDrag(pkEl('pkSV'), (e, r) => {
+    PK.s = clamp((e.clientX - r.left) / r.width, 0, 1);
+    PK.v = 1 - clamp((e.clientY - r.top) / r.height, 0, 1);
+    pkRender();
+  });
+  pkDrag(pkEl('pkHue'), (e, r) => {
+    PK.h = clamp((e.clientX - r.left) / r.width, 0, 1) * 360;
+    pkRender();
+  });
+  pkEl('pkHex').addEventListener('input', e => {
+    const h = normHex(e.target.value);
+    if(!h){ e.target.classList.add('bad'); return; }
+    const [r,g,b] = hex2rgb(h);
+    const hsv = rgb2hsv(r,g,b);
+    PK.h = hsv[1] > 0 || hsv[2] > 0 ? hsv[0] : PK.h;
+    PK.s = hsv[1]; PK.v = hsv[2];
+    pkRender('hex');
+  });
+  ['pkR','pkG','pkB'].forEach(id => pkEl(id).addEventListener('input', () => {
+    const vals = ['pkR','pkG','pkB'].map(k => Number(pkEl(k).value));
+    if(vals.some(v => !Number.isFinite(v) || v < 0 || v > 255)){ pkEl(id).classList.add('bad'); return; }
+    [PK.h, PK.s, PK.v] = rgb2hsv(vals[0], vals[1], vals[2]);
+    pkRender('rgb');
+  }));
+  const eye = pkEl('pkEye');
+  if(!window.EyeDropper){ eye.hidden = true; }
+  else eye.onclick = async () => {
+    try{
+      const res = await new window.EyeDropper().open();
+      const [r,g,b] = hex2rgb(res.sRGBHex);
+      [PK.h, PK.s, PK.v] = rgb2hsv(r,g,b);
+      pkRender();
+    }catch(err){ /* vazgeçildi */ }
+  };
+  document.addEventListener('pointerdown', e => {
+    if(pkEl('pick').hidden) return;
+    if(pkEl('pick').contains(e.target) || (PK.anchor && PK.anchor.contains(e.target))) return;
+    pkClose();
+  });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') pkClose(); });
+  window.addEventListener('resize', pkClose);
+}
+pkInit();
+
+/* ================= kaydetme ================= */
+const statusEl = $('#status');
+function setStatus(text, clearAfter){
+  statusEl.textContent = text;
+  if(clearAfter) setTimeout(() => { if(statusEl.textContent === text) statusEl.textContent = ''; }, clearAfter);
+}
+let saveTimer = 0;
+function commit(){
+  render();
+  clearTimeout(saveTimer);
+  if(!T) return; // tarayıcıda önizleme: kaydedecek yer yok
+  saveTimer = setTimeout(() => {
+    invoke('set_settings', { settings:S })
+      .then(next => { if(next){ S.mode = next.mode; } setStatus('Kaydedildi', 1600); })
+      .catch(err => setStatus('Kaydedilemedi: ' + err));
+  }, 160);
+}
+
+/* ================= tema ================= */
+function chipGroup(wrap, items, isActive, onPick, decorate){
+  wrap.innerHTML = '';
+  items.forEach((it, i) => {
+    const b = document.createElement('button');
+    b.className = 'chip'; b.type = 'button';
+    b.innerHTML = decorate ? decorate(it) : it.name;
+    b.setAttribute('aria-pressed', String(isActive(it, i)));
+    b.onclick = () => onPick(it, i);
+    wrap.appendChild(b);
+  });
+}
+const swatchStrip = cols => `<span class="sw">${cols.map(c => `<i style="background:${c}"></i>`).join('')}</span>`;
+
+function buildPresets(){
+  const items = [...PRESETS, { name:'WhatsApp', theme:null }];
+  chipGroup($('#presetChips'), items,
+    it => it.theme ? (S.themeEnabled && S.theme.name === it.name) : !S.themeEnabled,
+    it => {
+      pkClose();
+      if(!it.theme){ S.themeEnabled = false; }
+      else { S.themeEnabled = true; S.theme = { name:it.name, ...JSON.parse(JSON.stringify(it.theme)) }; }
+      syncControls(); commit();
+    },
+    it => it.theme
+      ? swatchStrip([it.theme.bg, it.theme.panel, it.theme.outBubble, it.theme.accent]) + it.name
+      : swatchStrip(['#111B21', '#202C33', '#005C4B', '#00A884']) + 'WhatsApp');
+}
+
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+const isPreset = name => PRESETS.some(p => p.name === name);
+const savedIndex = name => (S.savedThemes || []).findIndex(t => t.name === name);
+
+function buildSaved(){
+  const list = S.savedThemes || [];
+  chipGroup($('#savedChips'), list.map(t => ({ name:t.name, theme:t })),
+    it => S.themeEnabled && S.theme.name === it.name,
+    it => {
+      pkClose();
+      S.themeEnabled = true;
+      S.theme = JSON.parse(JSON.stringify(it.theme));
+      syncControls(); commit();
+    },
+    it => swatchStrip([it.theme.bg, it.theme.panel, it.theme.outBubble, it.theme.accent]) + esc(it.name));
+  $('#deleteTheme').hidden = !(S.themeEnabled && savedIndex(S.theme.name) >= 0);
+  const nameEl = $('#themeName');
+  if(document.activeElement !== nameEl) nameEl.value = (isPreset(S.theme.name) || S.theme.name === 'Özel') ? '' : S.theme.name;
+}
+
+function upsertSaved(theme){
+  S.savedThemes = S.savedThemes || [];
+  const i = savedIndex(theme.name);
+  const copy = JSON.parse(JSON.stringify(theme));
+  if(i >= 0) S.savedThemes[i] = copy; else S.savedThemes.push(copy);
+}
+
+$('#saveTheme').onclick = () => {
+  let name = $('#themeName').value.trim();
+  if(!name || name === 'Özel'){ setStatus('Önce bir ad yaz', 2500); $('#themeName').focus(); return; }
+  if(isPreset(name)) name += ' (özel)';
+  S.themeEnabled = true;
+  S.theme.name = name;
+  upsertSaved(S.theme);
+  syncControls(); commit();
+  setStatus('Tema kaydedildi', 2000);
+};
+$('#themeName').addEventListener('keydown', e => { if(e.key === 'Enter') $('#saveTheme').click(); });
+$('#deleteTheme').onclick = () => {
+  const i = savedIndex(S.theme.name);
+  if(i < 0) return;
+  S.savedThemes.splice(i, 1);
+  S.theme.name = 'Özel';
+  syncControls(); commit();
+  setStatus('Tema silindi', 2000);
+};
+$('#exportTheme').onclick = () => {
+  if(!T){ setStatus('Önizleme modunda dışa aktarılamaz', 2500); return; }
+  invoke('theme_export', { theme:S.theme })
+    .then(path => { if(path) setStatus('Dışa aktarıldı', 2500); })
+    .catch(err => setStatus(String(err)));
+};
+$('#importTheme').onclick = () => {
+  if(!T){ setStatus('Önizleme modunda içe aktarılamaz', 2500); return; }
+  invoke('theme_import')
+    .then(theme => {
+      if(!theme) return;
+      if(isPreset(theme.name)) theme.name += ' (içe aktarılan)';
+      upsertSaved(theme);
+      S.themeEnabled = true;
+      S.theme = JSON.parse(JSON.stringify(theme));
+      syncControls(); commit();
+      setStatus('Tema içe aktarıldı', 2500);
+    })
+    .catch(err => setStatus(String(err)));
+};
+
+function markCustom(){
+  // Hazır temadan sapınca adı "Özel" olur; ön ayar çipi artık basılı görünmez.
+  if(S.theme.name !== 'Özel'){ S.theme.name = 'Özel'; buildPresets(); buildSaved(); }
+  if(!S.themeEnabled){ S.themeEnabled = true; buildPresets(); }
+}
+
+function buildSlots(){
+  const wrap = $('#slots'); wrap.innerHTML = '';
+  SLOTS.forEach(([key, label]) => {
+    const cell = document.createElement('div'); cell.className = 'slotcell';
+    const sw = document.createElement('button');
+    sw.type = 'button'; sw.className = 'swatch';
+    sw.style.background = S.theme[key];
+    sw.setAttribute('aria-expanded','false');
+    sw.setAttribute('aria-label', `${label} rengini düzenle`);
+    const lbl = document.createElement('span'); lbl.className = 'lbl'; lbl.textContent = label;
+    const code = document.createElement('span'); code.className = 'code2'; code.textContent = String(S.theme[key]).toUpperCase();
+    sw.onclick = () => {
+      if(PK.anchor === sw){ pkClose(); return; }
+      pkOpen(sw, S.theme[key], hex => {
+        if(S.theme[key] === hex) return;
+        S.theme[key] = hex;
+        sw.style.background = hex; code.textContent = hex;
+        markCustom(); commit();
+      });
+    };
+    cell.append(sw, lbl, code);
+    wrap.appendChild(cell);
+  });
+}
+
+/* ================= duvar kağıdı ================= */
+function wallKind(){
+  const w = (S.theme.wallpaper || '').trim();
+  if(!w) return 'none';
+  return w.startsWith('url(') ? 'image' : 'gradient';
+}
+function buildWall(){
+  const items = [{ k:'none', name:'Düz renk' }, { k:'gradient', name:'Gradyan' }, { k:'image', name:'Görsel seç…' }];
+  chipGroup($('#wallChips'), items, it => it.k === wallKind(), it => {
+    if(it.k === 'none'){ S.theme.wallpaper = ''; }
+    else if(it.k === 'gradient'){
+      const p = PRESETS.find(p => p.name === S.theme.name);
+      S.theme.wallpaper = (p && p.theme.wallpaper && !p.theme.wallpaper.startsWith('url('))
+        ? p.theme.wallpaper
+        : `linear-gradient(160deg, ${S.theme.panel} 0%, ${S.theme.chatBg} 55%, ${S.theme.outBubble} 140%)`;
+    }
+    else { $('#wallFile').click(); return; }
+    buildWall(); commit();
+  });
+}
+$('#wallFile').addEventListener('change', async e => {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if(!file) return;
+  setStatus('Görsel hazırlanıyor');
+  try{
+    const bmp = await createImageBitmap(file);
+    const scale = Math.min(1, 1920 / Math.max(bmp.width, bmp.height));
+    const c = document.createElement('canvas');
+    c.width = Math.round(bmp.width * scale); c.height = Math.round(bmp.height * scale);
+    c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+    const url = c.toDataURL('image/jpeg', 0.86);
+    S.theme.wallpaper = `url("${url}")`;
+    markCustom(); buildWall(); commit();
+  }catch(err){ setStatus('Görsel açılamadı'); }
+});
+
+/* ================= düzen ================= */
+const MODES = [{ k:'phone', name:'Telefon' }, { k:'compact', name:'Kompakt' }, { k:'normal', name:'Normal' }];
+function buildModes(){
+  chipGroup($('#modeChips'), MODES, it => it.k === S.mode, it => {
+    S.mode = it.k; buildModes();
+    invoke('set_mode_cmd', { mode:it.k }).catch(() => {});
+  });
+}
+
+function slider(id, fmt, target){
+  const el = $('#'+id), out = $('#'+id+'O');
+  const get = () => target ? S[target][id] : S[id];
+  const set = v => { if(target) S[target][id] = v; else S[id] = v; };
+  const show = () => { out.textContent = fmt(get()); };
+  el.addEventListener('input', () => { set(+el.value); show(); if(target === 'theme') markCustom(); commit(); });
+  return () => { el.value = get(); show(); };
+}
+function check(id, key){
+  const el = $('#'+id);
+  el.addEventListener('change', () => {
+    if(key === 'hideTails'){ S.theme.hideTails = el.checked; markCustom(); }
+    else S[key] = el.checked;
+    if(key === 'notifications') $('#notifyPreview').disabled = !el.checked;
+    commit();
+  });
+  return () => {
+    el.checked = key === 'hideTails' ? !!S.theme.hideTails : !!S[key];
+    if(key === 'notifications') $('#notifyPreview').disabled = !el.checked;
+  };
+}
+
+const syncers = [
+  slider('radius', v => v + ' px', 'theme'),
+  slider('zoom', v => v + '%'),
+  slider('phoneZoom', v => v + '%'),
+  slider('phoneBreakpoint', v => v + ' px'),
+  check('hideTails', 'hideTails'),
+  check('phoneSnapRight', 'phoneSnapRight'),
+  check('phoneOnTop', 'phoneOnTop'),
+  check('alwaysOnTop', 'alwaysOnTop'),
+  check('closeToTray', 'closeToTray'),
+  check('autostart', 'autostart'),
+  check('notifications', 'notifications'),
+  check('notifyPreview', 'notifyPreview'),
+];
+$('#font').addEventListener('change', e => { S.theme.font = e.target.value; markCustom(); commit(); });
+let cssTimer = 0;
+$('#customCss').addEventListener('input', e => {
+  clearTimeout(cssTimer);
+  cssTimer = setTimeout(() => { S.customCss = e.target.value; commit(); }, 400);
+});
+
+function syncControls(){
+  if(!S.savedThemes) S.savedThemes = [];
+  buildPresets(); buildSaved(); buildSlots(); buildWall(); buildModes();
+  syncers.forEach(f => f());
+  $('#font').value = S.theme.font || 'Inter';
+  if(document.activeElement !== $('#customCss')) $('#customCss').value = S.customCss || '';
+  render();
+}
+
+/* ================= gelişmiş ================= */
+$('#diagBtn').onclick = () => {
+  setStatus('Tanılama hazırlanıyor');
+  invoke('run_diagnostics').catch(err => setStatus('WhatsApp penceresi açık değil'));
+};
+$('#folderBtn').onclick = () => invoke('open_data_dir').catch(() => {});
+listen('diag-saved', path => {
+  setStatus('Tanılama kaydedildi', 4000);
+  $('#diagNote').textContent = 'Kaydedildi: ' + path;
+});
+listen('settings-changed', next => {
+  if(!next || !S) return;
+  // Pencere tarafında değişen alanlar: mod, yakınlaştırma, her zaman üstte.
+  ['mode','zoom','phoneZoom','alwaysOnTop','phoneOnTop'].forEach(k => S[k] = next[k]);
+  syncControls();
+});
+
+/* ================= önizleme ================= */
+const wrapEl = $('#viewwrap'), surfaceEl = $('#surface'), waEl = $('#wa');
+const FRAMES = { desktop:[980, 620], phone:[390, 760] };
+
+function render(){
+  if(!S) return;
+  const t = S.themeEnabled ? S.theme : {
+    bg:'#111B21', panel:'#202C33', line:'#2A3942', dim:'#8696A0', ink:'#E9EDEF', accent:'#00A884', accentInk:'#111B21',
+    outBubble:'#005C4B', outInk:'#E9EDEF', inBubble:'#202C33', inInk:'#E9EDEF', chatBg:'#0B141A', wallpaper:'',
+    font:'WhatsApp', radius:0, hideTails:false };
+  const font = t.font === 'Inter' ? 'Inter, sans-serif' : t.font === 'Segoe UI' ? '"Segoe UI", system-ui, sans-serif' : '"Segoe UI", Helvetica, sans-serif';
+  const vars = {
+    '--p-bg':t.bg, '--p-panel':t.panel, '--p-line':t.line, '--p-dim':t.dim, '--p-ink':t.ink,
+    '--p-accent':t.accent, '--p-accent-ink':t.accentInk, '--p-out':t.outBubble, '--p-out-ink':t.outInk,
+    '--p-in':t.inBubble, '--p-in-ink':t.inInk, '--p-chat':t.chatBg, '--p-wall':t.wallpaper || 'none',
+    '--p-font':font, '--p-radius': (t.radius > 0 ? t.radius : 7.5) + 'px',
+  };
+  for(const k in vars) waEl.style.setProperty(k, vars[k]);
+  waEl.querySelectorAll('.b').forEach(b => b.classList.toggle('tail', !(S.themeEnabled && t.hideTails) && b.dataset.tail !== '0'));
+  waEl.dataset.view = view;
+  fit();
+  const modeName = { phone:'telefon', compact:'kompakt', normal:'normal' }[S.mode] || S.mode;
+  $('#meta').textContent = [
+    S.themeEnabled ? S.theme.name : 'WhatsApp teması',
+    S.themeEnabled ? (t.font === 'WhatsApp' ? 'WhatsApp yazı tipi' : t.font) : null,
+    S.themeEnabled && t.radius ? `köşe ${t.radius} px` : null,
+    `${modeName} mod`,
+    `tek panel < ${S.phoneBreakpoint} px`,
+  ].filter(Boolean).join(' · ');
+}
+// Son baloncuk ardışık mesaj: kuyruksuz
+waEl.querySelectorAll('.b')[4].dataset.tail = '0';
+
+function fit(){
+  const [fw, fh] = FRAMES[view];
+  const k = Math.min(1, wrapEl.clientWidth / fw, wrapEl.clientHeight / fh);
+  surfaceEl.style.width = Math.floor(fw * k) + 'px';
+  surfaceEl.style.height = Math.floor(fh * k) + 'px';
+  waEl.style.width = fw + 'px';
+  waEl.style.height = fh + 'px';
+  waEl.style.transform = `scale(${k})`;
+}
+new ResizeObserver(() => S && fit()).observe(wrapEl);
+
+const viewChips = $('#viewChips');
+viewChips.addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if(!b) return;
+  [...viewChips.children].forEach(c => c.setAttribute('aria-pressed', String(c === b)));
+  view = b.dataset.v; render();
+});
+
+/* ================= açılış ================= */
+/* ================= zamanlı mesajlar ================= */
+let SCHED = [];
+const STATE_TR = { bekliyor:'Bekliyor', gonderiliyor:'Gönderiliyor', gonderildi:'Gönderildi', kacirildi:'Kaçırıldı',
+  hata:'Gönderilemedi', iptal:'İptal edildi' };
+const fmtWhen = ms => new Date(ms).toLocaleString('tr-TR', { day:'numeric', month:'short', weekday:'short', hour:'2-digit', minute:'2-digit' });
+const el = (tag, cls, text) => { const e = document.createElement(tag); if(cls) e.className = cls; if(text != null) e.textContent = text; return e; };
+
+function schedAction(id, action){
+  invoke('schedule_action', { id, action }).catch(err => setStatus(String(err), 3000));
+}
+
+function renderSched(){
+  const wrap = $('#sched');
+  wrap.replaceChildren();
+  const open = SCHED.filter(i => ['bekliyor','gonderiliyor','kacirildi','hata'].includes(i.status)).sort((a,b) => a.due - b.due);
+  const done = SCHED.filter(i => ['gonderildi','iptal'].includes(i.status))
+    .sort((a,b) => (b.sentAt || b.due) - (a.sentAt || a.due)).slice(0, 8);
+  if(!open.length && !done.length){ wrap.append(el('div', 'sempty', 'Bekleyen mesaj yok.')); return; }
+  const row = it => {
+    const r = el('div', 'sitem');
+    const top = el('div', 'stop');
+    top.append(el('span', 'schat', it.chat), el('span', 'stime', fmtWhen(it.status === 'gonderildi' && it.sentAt ? it.sentAt : it.due)));
+    const foot = el('div', 'sfoot');
+    const state = STATE_TR[it.status] || it.status;
+    foot.append(el('span', 'sstate', it.error && it.status !== 'bekliyor' ? `${state} · ${it.error}` : state));
+    const btn = (label, action) => { const b = el('button', 'sbtn', label); b.type = 'button'; b.onclick = () => schedAction(it.id, action); foot.append(b); };
+    if(['kacirildi','hata'].includes(it.status)) btn('Şimdi gönder', 'send-now');
+    if(it.status === 'bekliyor') { btn('Şimdi gönder', 'send-now'); btn('İptal', 'cancel'); }
+    if(['kacirildi','hata','gonderildi','iptal'].includes(it.status)) btn('Sil', 'delete');
+    r.append(top, el('div', 'stext', it.text), foot);
+    return r;
+  };
+  open.forEach(it => wrap.append(row(it)));
+  if(done.length){ wrap.append(el('div', 'shead', 'Son gönderilenler')); done.forEach(it => wrap.append(row(it))); }
+}
+function loadSched(){
+  if(!T){ renderSched(); return; }
+  invoke('schedules').then(items => { SCHED = items || []; renderSched(); }).catch(() => renderSched());
+}
+listen('schedules-changed', items => { SCHED = items || []; renderSched(); });
+setInterval(() => { if(SCHED.some(i => i.status === 'bekliyor')) renderSched(); }, 60000);
+
+/* ================= güncelleme ================= */
+function renderUpd(u){
+  if(!u) return;
+  const t = $('#updText');
+  const gh = u.source === 'github';
+  if(u.updating) t.textContent = gh ? 'İndiriliyor. Kurulum bitince uygulama yeniden açılır.'
+    : 'Güncelleniyor. Derleme birkaç dakika sürer, sonra uygulama yeniden açılır.';
+  else if(u.available) t.textContent = `v${u.available} hazır · şu an v${u.current}`;
+  else t.textContent = `v${u.current} · güncel` + (gh ? ' (GitHub sürümleri)' : '');
+  $('#updInstall').hidden = !u.available || u.updating;
+}
+$('#updCheck').onclick = () => {
+  if(!T){ setStatus('Önizleme modu', 2000); return; }
+  invoke('update_status').then(u => { renderUpd(u); setStatus(u && u.available ? 'Yeni sürüm var' : 'Güncel', 2000); }).catch(err => setStatus(String(err)));
+};
+$('#updInstall').onclick = () => {
+  invoke('update_install').then(() => setStatus('Güncelleniyor')).catch(err => setStatus(String(err), 4000));
+};
+listen('update-status', renderUpd);
+
+const DEMO = {
+  themeEnabled:true, theme:{ name:'Siyah', ...PRESETS[0].theme }, zoom:100, phoneZoom:90, phoneBreakpoint:600,
+  phoneOnTop:true, phoneSnapRight:true, alwaysOnTop:false, closeToTray:true, autostart:false,
+  notifications:true, notifyPreview:true, mode:'normal', customCss:'', savedThemes:[],
+};
+invoke('get_settings')
+  .then(s => { S = s; syncControls(); })
+  .catch(() => { S = JSON.parse(JSON.stringify(DEMO)); syncControls(); setStatus('Önizleme modu'); });
+loadSched();
+if(T) invoke('update_status').then(renderUpd).catch(() => {});
+else renderUpd({ current:'0.2.0', available:null, updating:false, project:'C:\\Users\\…\\Tellal' });
+invoke('app_info').then(i => { if(i) $('#ver').textContent = `Sürüm ${i.version} · Kısayol ${i.shortcut}`; }).catch(() => {});
+</script>

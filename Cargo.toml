@@ -1,0 +1,25 @@
+[package]
+name = "tellal"
+version = "0.3.0"
+description = "Lightweight Windows desktop client for WhatsApp Web"
+license = "MIT"
+edition = "2024"
+
+[dependencies]
+base64 = "0.23.1"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+tauri = { version = "2", features = ["tray-icon", "image-png", "devtools"] }
+tauri-plugin-autostart = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-global-shortcut = "2"
+tauri-plugin-notification = "2"
+tauri-plugin-opener = "2"
+tauri-plugin-single-instance = "2"
+tauri-plugin-updater = "2"
+
+[build-dependencies]
+tauri-build = "2"
+
+[target.'cfg(windows)'.dependencies]
+tauri-winrt-notification = "0.8"

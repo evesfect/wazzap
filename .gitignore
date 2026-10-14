@@ -1,0 +1,6 @@
+/target/
+/node_modules/
+/gen/schemas/
+/tests/.init.js
+/gizli/
+*.key

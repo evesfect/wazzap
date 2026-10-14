@@ -1,0 +1,23 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "settings-window",
+  "description": "Yerel ayarlar penceresi.",
+  "windows": [
+    "settings"
+  ],
+  "permissions": [
+    "core:default",
+    "allow-get-settings",
+    "allow-set-settings",
+    "allow-set-mode-cmd",
+    "allow-run-diagnostics",
+    "allow-open-data-dir",
+    "allow-app-info",
+    "allow-schedules",
+    "allow-schedule-action",
+    "allow-theme-export",
+    "allow-theme-import",
+    "allow-update-status",
+    "allow-update-install"
+  ]
+}

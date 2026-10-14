@@ -1,0 +1,76 @@
+/*
+ * Telefon modu: pencere dar olunca (html.wap-phone) iki panel yerine tek panel.
+ * Paneller köprü tarafından data-wap-* ile işaretlenir (WhatsApp'ın sınıf adları
+ * her sürümde değiştiği için yapıdan bulunur).
+ *
+ * Gezinme şeridi (sol 64 px) her iki görünümde de kalır: WhatsApp'ın açılır panelleri
+ * (yeni sohbet, profil, ayarlar) konumlarını ona göre hesaplıyor.
+ */
+
+html.wap-phone,
+html.wap-phone body,
+html.wap-phone #app,
+html.wap-phone [data-wap-chain] {
+  min-width: 0 !important;
+}
+html.wap-phone [data-wap-chain] {
+  max-width: none !important;
+  width: 100% !important;
+}
+html.wap-phone [data-wap-split] {
+  min-width: 0 !important;
+  max-width: none !important;
+  width: 100% !important;
+}
+
+/* Görünen tek panel kalan genişliği doldurur */
+html.wap-phone [data-wap-split] > [data-wap-pane="list"],
+html.wap-phone [data-wap-split] > [data-wap-pane="chat"],
+html.wap-phone.wap-drawer [data-wap-split] > [data-wap-pane="drawer"][data-wap-open] {
+  flex: 1 1 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+}
+
+/* Liste görünümü */
+html.wap-phone:not(.wap-chat) [data-wap-split] > [data-wap-pane="chat"],
+html.wap-phone:not(.wap-chat) [data-wap-split] > [data-wap-pane="drawer"] {
+  display: none !important;
+}
+
+/* Sohbet görünümü */
+html.wap-phone.wap-chat [data-wap-split] > [data-wap-pane="list"] {
+  display: none !important;
+}
+
+/* Kişi / grup bilgisi açıkken sohbetin yerini alır; boş yan yuvalar yer kaplamaz */
+html.wap-phone [data-wap-split] > [data-wap-pane="drawer"]:not([data-wap-open]),
+html.wap-phone.wap-chat.wap-drawer [data-wap-split] > [data-wap-pane="chat"] {
+  display: none !important;
+}
+
+/* Liste üstünde açılan paneller (yeni sohbet, profil, ayarlar, arşiv) tam genişlik */
+html.wap-phone:not(.wap-chat) [data-testid="drawer-left"] {
+  flex: 1 1 auto !important;
+  width: auto !important;
+  max-width: none !important;
+}
+html.wap-phone:not(.wap-chat) [data-testid="drawer-middle"] {
+  display: none !important;
+}
+/* Sohbet görünümünde sohbet üstünde açılanlar (arama, medya) tam genişlik */
+html.wap-phone.wap-chat [data-testid="drawer-left"] {
+  display: none !important;
+}
+
+/* Geri oku ve ona yer açan başlık */
+html.wap-phone.wap-chat:not(.wap-drawer) #wap-back { display: flex; }
+html.wap-phone.wap-chat #main header { padding-left: 44px !important; }
+
+/* Dar genişlikte taşan yazı alanı */
+html.wap-phone #main footer,
+html.wap-phone #main footer > div,
+html.wap-phone #main footer > div > div {
+  min-width: 0 !important;
+}

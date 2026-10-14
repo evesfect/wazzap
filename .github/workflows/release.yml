@@ -1,0 +1,49 @@
+# v ile başlayan bir etiket (ör. v0.3.0) gönderilince Windows kurulumunu derleyip
+# GitHub Releases'a yükler. Uygulama içi güncelleme latest.json dosyasını buradan okur.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: swatinem/rust-cache@v2
+
+      - run: npm ci
+
+      - name: Point the updater at this repository
+        shell: pwsh
+        run: |
+          $c = Get-Content tauri.conf.json -Raw
+          $c.Replace('__REPO__', '${{ github.repository }}') | Set-Content tauri.conf.json -Encoding utf8NoBOM
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ''
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: Tellal ${{ github.ref_name }}
+          releaseBody: |
+            Download `Tellal_*_x64-setup.exe` below and run it. Installed copies update themselves.
+            Aşağıdaki `Tellal_*_x64-setup.exe` dosyasını indirip çalıştır. Kurulu sürümler kendini günceller.
+          releaseDraft: false
+          prerelease: false
+          includeUpdaterJson: true
