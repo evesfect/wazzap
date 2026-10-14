@@ -127,8 +127,8 @@ açılır. Derleme hatası olursa `tanilama/guncelleme.log` dosyasına yazılır
 
 `Cargo.toml` ve `tauri.conf.json` içindeki sürümü yükselt, sonra `release` dalına gönder
 (`git push origin main:release`); `v` etiketi otomatik oluşur. GitHub Actions kurulumu derleyip Releases'a yükler.
-Bunun için depoda `TAURI_SIGNING_PRIVATE_KEY` adlı bir Actions sırrı olmalı (güncelleme imza
-anahtarı; açık anahtarı `tauri.conf.json` içinde).
+Bunun için depoda iki Actions sırrı olmalı: `TAURI_SIGNING_PRIVATE_KEY` (güncelleme imza anahtarı)
+ve `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`; açık anahtarı `tauri.conf.json` içinde.
 
 ## Dosyalar
 

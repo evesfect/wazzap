@@ -38,9 +38,14 @@ jobs:
         shell: pwsh
         env:
           KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          PASS: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: |
           if (-not $env:KEY) {
             Write-Output "::error::TAURI_SIGNING_PRIVATE_KEY secret is missing (Settings > Secrets and variables > Actions)"
+            exit 1
+          }
+          if (-not $env:PASS) {
+            Write-Output "::error::TAURI_SIGNING_PRIVATE_KEY_PASSWORD secret is missing (Settings > Secrets and variables > Actions)"
             exit 1
           }
 
@@ -49,7 +54,7 @@ jobs:
         shell: pwsh
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ''
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: |
           npm run tauri build 2>&1 | Tee-Object -FilePath build.log
           if ($LASTEXITCODE -ne 0) {
@@ -62,7 +67,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ''
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           tagName: v__VERSION__
           releaseName: Wazzap v__VERSION__
