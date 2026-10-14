@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <rect width="1024" height="1024" rx="220" fill="#000"/>
+  <!-- balon: beyaz dış şekil (daire + kuyruk), üstüne siyah iç şekil; ortada çizgi kalmaz -->
+  <g fill="#fff"><circle cx="512" cy="481" r="307"/><polygon points="190.0,850.0 252.6,645.2 512,481 397.9,766.0"/></g>
+  <g fill="#000"><circle cx="512" cy="481" r="241"/><polygon points="293.6,737.0 325.3,633.3 512,481 399.5,694.2"/></g>
+  <g transform="rotate(-11 512 481) translate(512 481)">
+    <path d="M-106 -100 H100 L-110 100 H112" fill="none" stroke="#EC2500" stroke-width="60"
+      stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
