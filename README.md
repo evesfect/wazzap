@@ -8,8 +8,6 @@ collector on top. It does not touch messaging itself: the session, encryption an
 WhatsApp Web's own. Built with Tauri and the system WebView2 instead of Electron, so the installer
 is a few MB.
 
-![Wazzap? with the Navy theme (on the project's test page)](docs/screenshot.png)
-
 > **Disclaimer:** Wazzap? is an independent project. It is not affiliated with, endorsed by or
 > sponsored by WhatsApp LLC or Meta Platforms. "WhatsApp" is a trademark of Meta. Scheduled
 > messages are sent by driving the WhatsApp Web interface on your behalf, and WhatsApp's terms
