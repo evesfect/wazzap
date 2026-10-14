@@ -24,6 +24,100 @@
   const send = (kind, data) =>
     invoke('wa_event', { kind, data: data === undefined ? null : data }).catch(() => {});
 
+  /* ------------------------------------------------------------------ dil */
+  // Metinler Türkçe yazılır; İngilizce seçiliyse bu tablodan çevrilir. {0}, {1}: yer tutucular.
+  const EN = {
+      "Mini pencere (Ctrl+4)": "Mini window (Ctrl+4)",
+      "Her zaman üstte (Ctrl+T)": "Always on top (Ctrl+T)",
+      "Alta al": "Minimise",
+      "Tam ekran": "Maximise",
+      "Kapat": "Close",
+      "Büyüt (Ctrl+4)": "Expand (Ctrl+4)",
+      "Üstte kalmayı bırak (Ctrl+T)": "Stop staying on top (Ctrl+T)",
+      "Önceki boyut": "Restore",
+      "Sohbetlere dön (Esc)": "Back to chats (Esc)",
+      "Sohbetlere dön": "Back to chats",
+      "sohbet adı boş": "chat name is empty",
+      "arama kutusu bulunamadı": "search box not found",
+      "\"{0}\" adlı sohbet bulunamadı": "no chat named \"{0}\" found",
+      "sohbet açılamadı": "could not open the chat",
+      "mesaj yazı kutusuna yazılamadı": "could not type into the message box",
+      "gönder düğmesi çalışmadı; mesaj yazı kutusunda bekliyor": "the send button did not work; the message is waiting in the message box",
+      "yazı kutusu bulunamadı": "message box not found",
+      "sohbette yarım kalmış bir taslak var; sil ve \"Şimdi gönder\"e bas": "the chat has an unsent draft; clear it and press \"Send now\"",
+      "10 dakika sonra": "In 10 minutes",
+      "1 saat sonra": "In 1 hour",
+      "Bu akşam 21:00": "Tonight 21:00",
+      "Yarın 09:00": "Tomorrow 09:00",
+      "Zamanlı mesaj (Ctrl+Shift+Enter)": "Scheduled message (Ctrl+Shift+Enter)",
+      "Zamanlı mesaj": "Scheduled message",
+      "Zamanlanmış mesajı düzenle": "Edit scheduled message",
+      "Mesajı zamanla": "Schedule message",
+      "Mesaj yazın": "Type a message",
+      "Gönderim zamanı": "Send time",
+      "Kaydet": "Save",
+      "Zamanla": "Schedule",
+      "Mesaj boş": "Message is empty",
+      "Zaman seçin": "Pick a time",
+      "Yazı kutusundaki metni silin; yoksa gönderim takılır.": "Clear the message box, otherwise sending will get stuck.",
+      "geçmişte": "in the past",
+      "şimdi": "now",
+      "{0} dakika sonra": "in {0} min",
+      "{0} saat {1} dakika sonra": "in {0} h {1} min",
+      "{0} saat sonra": "in {0} h",
+      "{0} gün sonra": "in {0} days",
+      "Bugün {0}": "Today {0}",
+      "Yarın {0}": "Tomorrow {0}",
+      "Yarın": "Tomorrow",
+      "Zamanlanmış mesaj": "Scheduled message",
+      "{0} zamanlanmış mesaj": "{0} scheduled messages",
+      "Zamanlanmış mesaj, {0}": "Scheduled message, {0}",
+      "Gönderiliyor": "Sending",
+      "Kaçırıldı · {0}": "Missed · {0}",
+      "Gönderilemedi": "Failed to send",
+      "Şimdi gönder": "Send now",
+      "Düzenle": "Edit",
+      "Zamanlamayı iptal et": "Cancel schedule",
+      "Gönderiliyor…": "Sending…",
+      "Zamanlanmış": "Scheduled",
+      "Gönderilmedi": "Not sent",
+      "Daha az göster": "Show less",
+      "{0} sohbet daha": "{0} more chats",
+      "Zamanlanmış mesaj var": "Has a scheduled message",
+      "Medya toplayıcı (Ctrl+Shift+M)": "Media collector (Ctrl+Shift+M)",
+      "Medya toplayıcı": "Media collector",
+      "Medya": "Media",
+      "Klasörü aç": "Open folder",
+      "Görseller": "Images",
+      "Videolar": "Videos",
+      "Belgeler": "Documents",
+      "Yüklenmiş mesajlarda bu türde medya yok. Aşağıdan daha eski mesajları yükleyebilirsin.": "No media of this type in the loaded messages. You can load older messages below.",
+      "Daha eskileri yükle": "Load older",
+      "Durdur": "Stop",
+      "{0} öğeyi kaydet": "Save {0} items",
+      "Tümünü kaydet": "Save all",
+      "Eski mesajlar yükleniyor": "Loading older messages",
+      "Sohbetin başına ulaşıldı": "Reached the start of the chat",
+      "mesaj artık sayfada değil; sohbette ona kaydır": "the message is no longer on the page; scroll to it in the chat",
+      "belge düğmesi bulunamadı": "document button not found",
+      "indirme başlamadı": "download did not start",
+      "indirme başarısız": "download failed",
+      "video açılamadı": "could not open the video",
+      "görsel açılamadı": "could not open the image",
+      "{0} / {1} kaydediliyor": "Saving {0} / {1}",
+      "Durduruldu · {0} kaydedildi": "Stopped · {0} saved",
+      "{0} kaydedildi, {1} kaydedilemedi": "{0} saved, {1} failed",
+      "{0} öğe kaydedildi": "{0} items saved",
+      "{0} öğe İndirilenler/Wazzap klasörüne kaydedildi": "{0} items saved to Downloads/Wazzap"
+  };
+  const isEn = () => (S.lang || 'tr') === 'en';
+  const LOC = () => (isEn() ? 'en-GB' : 'tr-TR');
+  function L(text, ...args) {
+    let out = isEn() && EN[text] ? EN[text] : text;
+    args.forEach((a, i) => { out = out.split('{' + i + '}').join(String(a)); });
+    return out;
+  }
+
   /* ------------------------------------------------------- dış bağlantılar */
   // Mesajlardaki linkler varsayılan tarayıcıda açılsın. WhatsApp bazen boş bir pencere açıp
   // adresini sonradan veriyor; pencere isteği uygulamada yakalanamadığı için burada çözülür.
@@ -606,12 +700,12 @@
       const sep = mk('span', 'wap-minibar-sep');
       miniBar.append(
         title,
-        barButton('wap-bar-mini', 'Mini pencere (Ctrl+4)', svgIcon('M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7', 14), 'mini'),
-        barButton('wap-bar-pin', 'Her zaman üstte (Ctrl+T)', svgIcon(PIN_D, 14), 'ontop'),
+        barButton('wap-bar-mini', L('Mini pencere (Ctrl+4)'), svgIcon('M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7', 14), 'mini'),
+        barButton('wap-bar-pin', L('Her zaman üstte (Ctrl+T)'), svgIcon(PIN_D, 14), 'ontop'),
         sep,
-        barButton('wap-cap', 'Alta al', capIcon('M0 5.5h10'), 'minimize'),
-        barButton('wap-cap wap-bar-max', 'Tam ekran', capIcon('M0.5 0.5h9v9h-9z'), 'maximize'),
-        barButton('wap-cap wap-cap-close', 'Kapat', capIcon('M0 0l10 10M10 0L0 10'), 'hide'),
+        barButton('wap-cap', L('Alta al'), capIcon('M0 5.5h10'), 'minimize'),
+        barButton('wap-cap wap-bar-max', L('Tam ekran'), capIcon('M0.5 0.5h9v9h-9z'), 'maximize'),
+        barButton('wap-cap wap-cap-close', L('Kapat'), capIcon('M0 0l10 10M10 0L0 10'), 'hide'),
       );
       // Tauri'nin sürükleme bölgesi gibi: ilk basış sürükler, ikinci basış (çift tık) büyütür.
       // Sürükleme Windows'un taşıma döngüsüne girdiği için dblclick olayı güvenilir gelmez.
@@ -638,15 +732,15 @@
       miniBar.dataset.state = key;
       const m = miniBar.querySelector('.wap-bar-mini');
       m.replaceChildren(svgIcon(mini ? 'M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7' : 'M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7', 14));
-      m.title = mini ? 'Büyüt (Ctrl+4)' : 'Mini pencere (Ctrl+4)';
+      m.title = mini ? L('Büyüt (Ctrl+4)') : L('Mini pencere (Ctrl+4)');
       m.setAttribute('aria-label', m.title);
       const p = miniBar.querySelector('.wap-bar-pin');
       p.classList.toggle('on', pinned);
       p.setAttribute('aria-pressed', String(pinned));
-      p.title = pinned ? 'Üstte kalmayı bırak (Ctrl+T)' : 'Her zaman üstte (Ctrl+T)';
+      p.title = pinned ? L('Üstte kalmayı bırak (Ctrl+T)') : L('Her zaman üstte (Ctrl+T)');
       const x = miniBar.querySelector('.wap-bar-max');
       x.replaceChildren(capIcon(WIN.max ? 'M2.5 2.5V0.5h7v7h-2M0.5 2.5h7v7h-7z' : 'M0.5 0.5h9v9h-9z'));
-      x.title = WIN.max ? 'Önceki boyut' : 'Tam ekran';
+      x.title = WIN.max ? L('Önceki boyut') : L('Tam ekran');
       x.setAttribute('aria-label', x.title);
       x.hidden = mini;
     }
@@ -804,8 +898,8 @@
     backBtn = document.createElement('button');
     backBtn.id = 'wap-back';
     backBtn.type = 'button';
-    backBtn.title = 'Sohbetlere dön (Esc)';
-    backBtn.setAttribute('aria-label', 'Sohbetlere dön');
+    backBtn.title = L('Sohbetlere dön (Esc)');
+    backBtn.setAttribute('aria-label', L('Sohbetlere dön'));
     // innerHTML yerine DOM ile: sayfa ileride Trusted Types açarsa da çalışsın.
     const NS = 'http://www.w3.org/2000/svg';
     const svg = document.createElementNS(NS, 'svg');
@@ -1014,7 +1108,7 @@
 
   async function openChat(title) {
     const want = norm(title);
-    if (!want) throw new Error('sohbet adı boş');
+    if (!want) throw new Error(L('sohbet adı boş'));
     if (!await waitFor(() => document.getElementById('pane-side'), 20000, 250)) {
       throw coded('hazir-degil', 'WhatsApp henüz yüklenmedi');
     }
@@ -1023,14 +1117,14 @@
     let searched = false;
     try {
       if (!row) {
-        if (!setSearch(title)) throw new Error('arama kutusu bulunamadı');
+        if (!setSearch(title)) throw new Error(L('arama kutusu bulunamadı'));
         searched = true;
         row = await waitFor(() => findRow(want), 6000, 150);
       }
-      if (!row) throw new Error('"' + want + '" adlı sohbet bulunamadı');
+      if (!row) throw new Error(L('"{0}" adlı sohbet bulunamadı', want));
       row.scrollIntoView({ block: 'nearest' });
       press(row.querySelector('span[title]') || row);
-      if (!await waitFor(() => currentChatTitle() === want, 6000, 120)) throw new Error('sohbet açılamadı');
+      if (!await waitFor(() => currentChatTitle() === want, 6000, 120)) throw new Error(L('sohbet açılamadı'));
       setChat(true);
       return true;
     } finally {
@@ -1079,7 +1173,7 @@
       if (line) document.execCommand('insertText', false, line);
     });
     if (await waitFor(() => textOf(el) === want, 1200, 80)) return 'type';
-    throw new Error('mesaj yazı kutusuna yazılamadı');
+    throw new Error(L('mesaj yazı kutusuna yazılamadı'));
   }
 
   function sendButton() {
@@ -1094,7 +1188,7 @@
     const btn = await waitFor(sendButton, 1500, 100);
     if (btn) press(btn);
     else el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, cancelable: true }));
-    if (!await waitFor(() => textOf(el) === '', 5000, 100)) throw new Error('gönder düğmesi çalışmadı; mesaj yazı kutusunda bekliyor');
+    if (!await waitFor(() => textOf(el) === '', 5000, 100)) throw new Error(L('gönder düğmesi çalışmadı; mesaj yazı kutusunda bekliyor'));
   }
 
   let sending = false;
@@ -1107,8 +1201,8 @@
     try {
       await openChat(item.chat);
       const el = await waitFor(composer, 4000, 100);
-      if (!el) throw new Error('yazı kutusu bulunamadı');
-      if (textOf(el) !== '') throw new Error('sohbette yarım kalmış bir taslak var; sil ve "Şimdi gönder"e bas');
+      if (!el) throw new Error(L('yazı kutusu bulunamadı'));
+      if (textOf(el) !== '') throw new Error(L('sohbette yarım kalmış bir taslak var; sil ve "Şimdi gönder"e bas'));
       await insertComposer(el, String(item.text || ''));
       await sendComposer(el);
       report(true);
@@ -1171,9 +1265,9 @@
     return d.getTime();
   }
   function quickTimes() {
-    const out = [['10 dakika sonra', () => minutesFromNow(10)], ['1 saat sonra', inAnHour]];
-    if (new Date().getHours() < 20) out.push(['Bu akşam 21:00', () => at(0, 21, 0)]);
-    out.push(['Yarın 09:00', () => at(1, 9, 0)]);
+    const out = [[L('10 dakika sonra'), () => minutesFromNow(10)], [L('1 saat sonra'), inAnHour]];
+    if (new Date().getHours() < 20) out.push([L('Bu akşam 21:00'), () => at(0, 21, 0)]);
+    out.push([L('Yarın 09:00'), () => at(1, 9, 0)]);
     return out;
   }
 
@@ -1182,8 +1276,8 @@
     if (!document.body) return;
     fab = mk('button', 'wap-fab');
     fab.type = 'button';
-    fab.title = 'Zamanlı mesaj (Ctrl+Shift+Enter)';
-    fab.setAttribute('aria-label', 'Zamanlı mesaj');
+    fab.title = L('Zamanlı mesaj (Ctrl+Shift+Enter)');
+    fab.setAttribute('aria-label', L('Zamanlı mesaj'));
     fab.appendChild(clockIcon(20));
     fab.addEventListener('click', (e) => {
       e.preventDefault();
@@ -1284,20 +1378,20 @@
     closeMenu();
     panel = mk('div', 'wap-panel');
     panel.setAttribute('role', 'dialog');
-    panel.setAttribute('aria-label', editing ? 'Zamanlanmış mesajı düzenle' : 'Mesajı zamanla');
+    panel.setAttribute('aria-label', editing ? L('Zamanlanmış mesajı düzenle') : L('Mesajı zamanla'));
     panel.dataset.chat = title;
     panel.style.fontFamily = waFont();
 
     const head = mk('div', 'wap-panel-head');
-    const x = iconButton('wap-icon-btn', 'Kapat', svgIcon('M18 6 6 18M6 6l12 12', 20));
+    const x = iconButton('wap-icon-btn', L('Kapat'), svgIcon('M18 6 6 18M6 6l12 12', 20));
     x.addEventListener('click', closePanel);
     const titles = mk('div', 'wap-panel-titles');
-    titles.append(mk('div', 'wap-panel-title', editing ? 'Zamanlanmış mesajı düzenle' : 'Mesajı zamanla'), mk('div', 'wap-panel-sub', title));
+    titles.append(mk('div', 'wap-panel-title', editing ? L('Zamanlanmış mesajı düzenle') : L('Mesajı zamanla')), mk('div', 'wap-panel-sub', title));
     head.append(x, titles);
 
     const ta = mk('textarea', 'wap-input wap-ta');
     ta.rows = 3;
-    ta.placeholder = 'Mesaj yazın';
+    ta.placeholder = L('Mesaj yazın');
     ta.value = editing ? editing.text : (opts.text || '');
 
     const due0 = editing ? Math.max(editing.due, Date.now() + 5 * 60 * 1000) : inAnHour();
@@ -1305,7 +1399,7 @@
     dt.type = 'datetime-local';
     dt.step = 60;
     dt.value = toLocalInput(due0);
-    dt.setAttribute('aria-label', 'Gönderim zamanı');
+    dt.setAttribute('aria-label', L('Gönderim zamanı'));
 
     const when = mk('div', 'wap-when');
     const updateWhen = () => {
@@ -1336,7 +1430,7 @@
 
     const foot = mk('div', 'wap-panel-foot');
     const st = mk('span', 'wap-st');
-    const go = mk('button', 'wap-go', editing ? 'Kaydet' : 'Zamanla');
+    const go = mk('button', 'wap-go', editing ? L('Kaydet') : L('Zamanla'));
     go.type = 'button';
     foot.append(st, go);
 
@@ -1350,8 +1444,8 @@
 
     go.addEventListener('click', async () => {
       const due = fromLocalInput(dt.value);
-      if (!ta.value.trim()) { st.textContent = 'Mesaj boş'; ta.focus(); return; }
-      if (!Number.isFinite(due)) { st.textContent = 'Zaman seçin'; return; }
+      if (!ta.value.trim()) { st.textContent = L('Mesaj boş'); ta.focus(); return; }
+      if (!Number.isFinite(due)) { st.textContent = L('Zaman seçin'); return; }
       go.disabled = true;
       st.textContent = '';
       try {
@@ -1361,7 +1455,7 @@
           await invoke('wa_schedule', { action: 'add', data: { chat: title, text: ta.value, due } });
         }
         let warn = '';
-        if (fromComposer && !clearComposer()) warn = 'Yazı kutusundaki metni silin; yoksa gönderim takılır.';
+        if (fromComposer && !clearComposer()) warn = L('Yazı kutusundaki metni silin; yoksa gönderim takılır.');
         fromComposer = false;
         closePanel();
         if (warn) toast(warn);
@@ -1402,22 +1496,22 @@
   /** "34 dakika sonra", "2 saat 5 dakika sonra", "3 gün sonra" */
   function untilText(ms) {
     const min = Math.round((ms - Date.now()) / 60000);
-    if (min < 1) return min < -1 ? 'geçmişte' : 'şimdi';
-    if (min < 60) return min + ' dakika sonra';
+    if (min < 1) return min < -1 ? L('geçmişte') : L('şimdi');
+    if (min < 60) return L('{0} dakika sonra', min);
     const h = Math.floor(min / 60), m = min % 60;
-    if (h < 24) return h + ' saat' + (m ? ' ' + m + ' dakika' : '') + ' sonra';
-    return Math.round(h / 24) + ' gün sonra';
+    if (h < 24) return m ? L('{0} saat {1} dakika sonra', h, m) : L('{0} saat sonra', h);
+    return L('{0} gün sonra', Math.round(h / 24));
   }
 
   function relTime(ms) {
     const d = new Date(ms);
     const day = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
     const diff = Math.round((day(d) - day(new Date())) / 86400000);
-    const hm = d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-    if (diff === 0) return 'Bugün ' + hm;
-    if (diff === 1) return 'Yarın ' + hm;
-    if (diff > 1 && diff < 7) return d.toLocaleDateString('tr-TR', { weekday: 'long' }) + ' ' + hm;
-    return d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' }) + ' ' + hm;
+    const hm = d.toLocaleTimeString(LOC(), { hour: '2-digit', minute: '2-digit' });
+    if (diff === 0) return L('Bugün {0}', hm);
+    if (diff === 1) return L('Yarın {0}', hm);
+    if (diff > 1 && diff < 7) return d.toLocaleDateString(LOC(), { weekday: 'long' }) + ' ' + hm;
+    return d.toLocaleDateString(LOC(), { day: 'numeric', month: 'long' }) + ' ' + hm;
   }
 
   function messagesBox() {
@@ -1512,21 +1606,21 @@
       safe('bubble-measure', () => measureBubble(box));
       applyBubbleLook(ghostZone);
       const sep = mk('div', 'wap-sched-sep');
-      sep.append(mk('span', null, items.length === 1 ? 'Zamanlanmış mesaj' : `${items.length} zamanlanmış mesaj`));
+      sep.append(mk('span', null, items.length === 1 ? L('Zamanlanmış mesaj') : L('{0} zamanlanmış mesaj', items.length)));
       ghostZone.appendChild(sep);
       for (const it of items) {
         const row = mk('div', 'wap-ghost-row');
         const b = mk('div', 'wap-ghost');
         b.tabIndex = 0;
         b.setAttribute('role', 'button');
-        b.setAttribute('aria-label', 'Zamanlanmış mesaj, ' + relTime(it.due));
+        b.setAttribute('aria-label', L('Zamanlanmış mesaj, {0}', relTime(it.due)));
         b.dataset.id = it.id;
         if (it.status !== 'bekliyor' && it.status !== 'gonderiliyor') b.classList.add('wap-ghost-problem');
         const text = mk('span', 'wap-ghost-text', it.text);
         const meta = mk('span', 'wap-ghost-meta');
-        const label = it.status === 'gonderiliyor' ? 'Gönderiliyor'
-          : it.status === 'kacirildi' ? 'Kaçırıldı · ' + relTime(it.due)
-          : it.status === 'hata' ? 'Gönderilemedi'
+        const label = it.status === 'gonderiliyor' ? L('Gönderiliyor')
+          : it.status === 'kacirildi' ? L('Kaçırıldı · {0}', relTime(it.due))
+          : it.status === 'hata' ? L('Gönderilemedi')
           : relTime(it.due);
         meta.append(mk('span', null, label), clockGlyph());
         b.append(text, mk('span', 'wap-ghost-spacer'), meta);
@@ -1568,11 +1662,11 @@
       menu.appendChild(m);
     };
     if (it.status !== 'gonderiliyor') {
-      add('Şimdi gönder', () => invoke('wa_schedule', { action: 'send-now', data: { id: it.id } }));
-      add('Düzenle', () => openPanel({ item: it }));
-      add('Zamanlamayı iptal et', () => invoke('wa_schedule', { action: 'cancel', data: { id: it.id } }), true);
+      add(L('Şimdi gönder'), () => invoke('wa_schedule', { action: 'send-now', data: { id: it.id } }));
+      add(L('Düzenle'), () => openPanel({ item: it }));
+      add(L('Zamanlamayı iptal et'), () => invoke('wa_schedule', { action: 'cancel', data: { id: it.id } }), true);
     } else {
-      add('Gönderiliyor…', () => {});
+      add(L('Gönderiliyor…'), () => {});
     }
     document.body.appendChild(menu);
     const r = anchor.getBoundingClientRect();
@@ -1663,10 +1757,10 @@
     const d = new Date(ms);
     const day = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
     const diff = Math.round((day(d) - day(new Date())) / 86400000);
-    if (diff === 0) return d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-    if (diff === 1) return 'Yarın';
-    if (diff > 1 && diff < 7) return d.toLocaleDateString('tr-TR', { weekday: 'long' });
-    return d.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    if (diff === 0) return d.toLocaleTimeString(LOC(), { hour: '2-digit', minute: '2-digit' });
+    if (diff === 1) return L('Yarın');
+    if (diff > 1 && diff < 7) return d.toLocaleDateString(LOC(), { weekday: 'long' });
+    return d.toLocaleDateString(LOC(), { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 
   function renderSchedList() {
@@ -1702,7 +1796,7 @@
       }
       schedSection.replaceChildren();
       const head = mk('div', 'wap-sched-head');
-      head.append(clockGlyph(), mk('span', null, 'Zamanlanmış'), mk('span', 'wap-sched-count', String(allItems.length)));
+      head.append(clockGlyph(), mk('span', null, L('Zamanlanmış')), mk('span', 'wap-sched-count', String(allItems.length)));
       schedSection.appendChild(head);
       const visible = schedOpen ? groups : groups.slice(0, 3);
       for (const [chat, g] of visible) {
@@ -1714,7 +1808,7 @@
         av.appendChild(avatarFor(chat));
         const body = mk('div', 'wap-sched-body');
         const top = mk('div', 'wap-sched-top');
-        top.append(mk('span', 'wap-sched-name', chat), mk('span', 'wap-sched-time' + (g.problem ? ' wap-sched-bad' : ''), g.problem ? 'Gönderilmedi' : shortWhen(g.first.due)));
+        top.append(mk('span', 'wap-sched-name', chat), mk('span', 'wap-sched-time' + (g.problem ? ' wap-sched-bad' : ''), g.problem ? L('Gönderilmedi') : shortWhen(g.first.due)));
         const bottom = mk('div', 'wap-sched-bottom');
         const prev = mk('span', 'wap-sched-snip');
         prev.append(clockGlyph(), mk('span', null, g.first.text.replace(/\s+/g, ' ')));
@@ -1728,7 +1822,7 @@
         schedSection.appendChild(row);
       }
       if (groups.length > 3) {
-        const more = mk('button', 'wap-sched-more', schedOpen ? 'Daha az göster' : `${groups.length - 3} sohbet daha`);
+        const more = mk('button', 'wap-sched-more', schedOpen ? L('Daha az göster') : L('{0} sohbet daha', groups.length - 3));
         more.type = 'button';
         more.addEventListener('click', () => { schedOpen = !schedOpen; schedKey = ''; renderSchedList(); });
         schedSection.appendChild(more);
@@ -1747,7 +1841,7 @@
       let icon = n.parentElement && n.parentElement.querySelector(':scope > .wap-row-clock');
       if (has && !icon) {
         icon = mk('span', 'wap-row-clock');
-        icon.title = 'Zamanlanmış mesaj var';
+        icon.title = L('Zamanlanmış mesaj var');
         icon.appendChild(clockGlyph());
         n.insertAdjacentElement('afterend', icon);
       } else if (!has && icon) {
@@ -1812,7 +1906,7 @@
   function ensureMediaFab() {
     if (mediaFab && mediaFab.isConnected) return;
     if (!document.body) return;
-    mediaFab = iconButton('wap-fab wap-fab-media', 'Medya toplayıcı (Ctrl+Shift+M)',
+    mediaFab = iconButton('wap-fab wap-fab-media', L('Medya toplayıcı (Ctrl+Shift+M)'),
       svgIcon('M4 5h16v14H4zM4 15l4-4 4 4 3-3 5 5M15.5 9.5h.01', 20));
     mediaFab.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); if (mediaPanel) closeMedia(); else openMedia(); });
     document.body.appendChild(mediaFab);
@@ -1851,7 +1945,7 @@
     scanMedia();
     mediaPanel = mk('div', 'wap-media');
     mediaPanel.setAttribute('role', 'dialog');
-    mediaPanel.setAttribute('aria-label', 'Medya toplayıcı');
+    mediaPanel.setAttribute('aria-label', L('Medya toplayıcı'));
     mediaPanel.dataset.chat = chat;
     mediaPanel.style.fontFamily = waFont();
     document.body.appendChild(mediaPanel);
@@ -1875,17 +1969,17 @@
 
     mediaPanel.replaceChildren();
     const head = mk('div', 'wap-panel-head');
-    const x = iconButton('wap-icon-btn', 'Kapat', svgIcon('M18 6 6 18M6 6l12 12', 20));
+    const x = iconButton('wap-icon-btn', L('Kapat'), svgIcon('M18 6 6 18M6 6l12 12', 20));
     x.addEventListener('click', closeMedia);
     const titles = mk('div', 'wap-panel-titles');
-    titles.append(mk('div', 'wap-panel-title', 'Medya'), mk('div', 'wap-panel-sub', MEDIA.chat));
-    const folder = iconButton('wap-icon-btn', 'Klasörü aç', svgIcon('M3 7h6l2 2h10v10H3z', 20));
+    titles.append(mk('div', 'wap-panel-title', L('Medya')), mk('div', 'wap-panel-sub', MEDIA.chat));
+    const folder = iconButton('wap-icon-btn', L('Klasörü aç'), svgIcon('M3 7h6l2 2h10v10H3z', 20));
     folder.style.marginLeft = 'auto';
     folder.addEventListener('click', () => invoke('wa_media', { action: 'open', data: { chat: MEDIA.chat } }).catch((e) => toast(String(e))));
     head.append(x, titles, folder);
 
     const tabs = mk('div', 'wap-chips wap-media-tabs');
-    for (const [k, label] of [['image', 'Görseller'], ['video', 'Videolar'], ['doc', 'Belgeler']]) {
+    for (const [k, label] of [['image', L('Görseller')], ['video', L('Videolar')], ['doc', L('Belgeler')]]) {
       const b = mk('button', 'wap-chip', `${label} ${counts[k]}`);
       b.type = 'button';
       b.setAttribute('aria-pressed', String(MEDIA.tab === k));
@@ -1895,7 +1989,7 @@
 
     const grid = mk('div', MEDIA.tab === 'doc' ? 'wap-media-docs' : 'wap-media-grid');
     if (!list.length) {
-      grid.appendChild(mk('div', 'wap-media-empty', 'Yüklenmiş mesajlarda bu türde medya yok. Aşağıdan daha eski mesajları yükleyebilirsin.'));
+      grid.appendChild(mk('div', 'wap-media-empty', L('Yüklenmiş mesajlarda bu türde medya yok. Aşağıdan daha eski mesajları yükleyebilirsin.')));
     }
     for (const it of list) {
       const cell = mk('button', 'wap-media-cell');
@@ -1923,7 +2017,7 @@
     }
 
     const foot = mk('div', 'wap-media-foot');
-    const older = mk('button', 'wap-btn-text', 'Daha eskileri yükle');
+    const older = mk('button', 'wap-btn-text', L('Daha eskileri yükle'));
     older.type = 'button';
     older.addEventListener('click', loadOlder);
     const st = mk('span', 'wap-st wap-media-st');
@@ -1942,10 +2036,10 @@
   function updateMediaFoot() {
     const go = mediaPanel && mediaPanel.querySelector('.wap-media-go');
     if (!go) return;
-    if (MEDIA.busy) { go.textContent = 'Durdur'; go.disabled = false; return; }
+    if (MEDIA.busy) { go.textContent = L('Durdur'); go.disabled = false; return; }
     const list = [...MEDIA.items.values()].filter((i) => i.type === MEDIA.tab);
     const sel = list.filter((i) => MEDIA.selected.has(i.id)).length;
-    go.textContent = sel ? `${sel} öğeyi kaydet` : 'Tümünü kaydet';
+    go.textContent = sel ? L('{0} öğeyi kaydet', sel) : L('Tümünü kaydet');
     go.disabled = !list.length;
   }
 
@@ -1958,14 +2052,14 @@
     let same = 0;
     for (let i = 0; i < 12 && same < 2 && !MEDIA.cancel; i++) {
       const h = box.scrollHeight;
-      setMediaStatus('Eski mesajlar yükleniyor');
+      setMediaStatus(L('Eski mesajlar yükleniyor'));
       box.scrollTop = 0;
       await sleep(1300);
       scanMedia();
       same = box.scrollHeight === h ? same + 1 : 0;
     }
     MEDIA.busy = false;
-    setMediaStatus(same >= 2 ? 'Sohbetin başına ulaşıldı' : '');
+    setMediaStatus(same >= 2 ? L('Sohbetin başına ulaşıldı') : '');
     renderMedia();
   }
 
@@ -2004,17 +2098,17 @@
   async function saveOne(it, index) {
     const row = rowById(it.id);
     if (it.type === 'doc') {
-      if (!row) throw new Error('mesaj artık sayfada değil; sohbette ona kaydır');
+      if (!row) throw new Error(L('mesaj artık sayfada değil; sohbette ona kaydır'));
       const ctl = row.querySelector('[data-icon*="download"]');
       const target = (ctl && (ctl.closest('button, [role="button"]') || ctl))
         || [...row.querySelectorAll('[title]')].find((e) => DOC_EXT.test((e.getAttribute('title') || '').trim()));
-      if (!target) throw new Error('belge düğmesi bulunamadı');
+      if (!target) throw new Error(L('belge düğmesi bulunamadı'));
       const done = new Promise((resolve) => { MEDIA.docWait = resolve; });
       press(target);
       const ok = await Promise.race([done, sleep(30000).then(() => null)]);
       MEDIA.docWait = null;
-      if (ok === null) throw new Error('indirme başlamadı');
-      if (!ok) throw new Error('indirme başarısız');
+      if (ok === null) throw new Error(L('indirme başlamadı'));
+      if (!ok) throw new Error(L('indirme başarısız'));
       return;
     }
     let url = null;
@@ -2030,7 +2124,7 @@
     }
     if (!url && it.type === 'image' && /^blob:/.test(it.thumb || '')) url = it.thumb; // yedek: sohbetteki görsel
     try {
-      if (!url) throw new Error(it.type === 'video' ? 'video açılamadı' : 'görsel açılamadı');
+      if (!url) throw new Error(it.type === 'video' ? L('video açılamadı') : L('görsel açılamadı'));
       const { data, type } = await blobToB64(url);
       const ext = EXT[type] || (it.type === 'video' ? 'mp4' : 'jpg');
       const name = `${MEDIA.chat} ${stamp()} ${String(index + 1).padStart(3, '0')}.${ext}`;
@@ -2054,14 +2148,14 @@
     let ok = 0, bad = 0;
     for (let i = 0; i < list.length && !MEDIA.cancel; i++) {
       const it = list[i];
-      setMediaStatus(`${i + 1} / ${list.length} kaydediliyor`);
+      setMediaStatus(L('{0} / {1} kaydediliyor', i + 1, list.length));
       try { await saveOne(it, i); it.saved = true; it.error = null; ok++; } catch (e) { it.error = (e && e.message) || String(e); bad++; }
     }
     MEDIA.busy = false;
     invoke('wa_media', { action: 'target', data: { chat: '' } }).catch(() => {});
     renderMedia();
-    setMediaStatus(MEDIA.cancel ? `Durduruldu · ${ok} kaydedildi` : bad ? `${ok} kaydedildi, ${bad} kaydedilemedi` : `${ok} öğe kaydedildi`);
-    if (ok) toast(`${ok} öğe İndirilenler/Wazzap klasörüne kaydedildi`);
+    setMediaStatus(MEDIA.cancel ? L('Durduruldu · {0} kaydedildi', ok) : bad ? L('{0} kaydedildi, {1} kaydedilemedi', ok, bad) : L('{0} öğe kaydedildi', ok));
+    if (ok) toast(L('{0} öğe İndirilenler/Wazzap klasörüne kaydedildi', ok));
   }
 
   /* ------------------------------------------------------------- girişler */
@@ -2285,7 +2379,17 @@
   /* --------------------------------------------------------------- dışa */
 
   function apply(next) {
+    const prevLang = S.lang;
     if (next && typeof next === 'object') S = next;
+    if (prevLang !== S.lang) {
+      // Dil değişti: kendi düğmelerimizi yeni dille yeniden kur.
+      [miniBar, fab, mediaFab, backBtn].forEach((el) => { if (el) el.remove(); });
+      closePanel();
+      closeMenu();
+      if (mediaPanel) closeMedia();
+      schedKey = '';
+      ghostKey = '';
+    }
     ensureSheets();
     rebuildTheme();
     safeReplace(sheets.custom, S.customCss || '');

@@ -25,7 +25,8 @@ them in one click.
 The installer is not code-signed, so Windows may show "Windows protected your PC" the first time:
 choose **More info → Run anyway**.
 
-The interface is in Turkish.
+The interface is in English and Turkish. It follows the Windows display language; change it under
+Settings → Desktop.
 
 ### Build from source
 

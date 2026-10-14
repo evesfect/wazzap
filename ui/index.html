@@ -299,6 +299,7 @@
   <details class="grp" open>
     <summary>Masaüstü</summary>
     <div class="body">
+      <div class="chips" id="langChips" aria-label="Dil · Language"></div>
       <label class="check"><input type="checkbox" id="closeToTray"> Kapatınca tepside çalışmaya devam etsin</label>
       <label class="check"><input type="checkbox" id="autostart"> Windows açılınca arka planda başlasın</label>
       <label class="check"><input type="checkbox" id="notifications"> Bildirim göster</label>
@@ -410,6 +411,211 @@ function listen(event, cb){
   if(!T) return;
   const handler = T.transformCallback(e => cb(e.payload));
   invoke('plugin:event|listen', { event, target:{ kind:'Any' }, handler }).catch(() => {});
+}
+
+/* ================= dil ================= */
+// Metinler Türkçe yazılır; İngilizce seçiliyse bu tablodan çevrilir. {0}, {1}: yer tutucular.
+const EN = {
+  "Temayı seç, renkleri ayarla, düzeni WhatsApp'a uygula.": "Pick a theme, adjust colours, apply the layout to WhatsApp.",
+  "Tema": "Theme",
+  "Temayı kaydet": "Save theme",
+  "Kaydet": "Save",
+  "Dışa aktar": "Export",
+  "İçe aktar": "Import",
+  "Kaydedilen temayı sil": "Delete saved theme",
+  "WhatsApp'ın kendi ayarlarından Koyu temayı seçersen renk eşleşmesi en temiz sonucu verir.": "Choose the Dark theme in WhatsApp's own settings for the cleanest colour match.",
+  "Renkler": "Colours",
+  "Baloncuk ve yazı": "Bubbles and text",
+  "Köşe": "Corners",
+  "Baloncuk kuyruklarını gizle": "Hide bubble tails",
+  "Yazı tipi": "Font",
+  "Inter — ev stili": "Inter — house style",
+  "Segoe UI — Windows": "Segoe UI — Windows",
+  "WhatsApp'ın kendi yazı tipi": "WhatsApp's own font",
+  "Duvar kağıdı": "Wallpaper",
+  "Düzen": "Layout",
+  "Normal mod": "Normal mode",
+  "Telefon modu": "Phone mode",
+  "Tek panel eşiği": "Single-panel threshold",
+  "Telefon modunda sağ kenara yapış": "Snap to the right edge in phone mode",
+  "Telefon modunda her zaman üstte": "Always on top in phone mode",
+  "Normal modda her zaman üstte": "Always on top in normal mode",
+  "Pencere bu genişliğin altına inince liste ve sohbet tek panelde, sırayla açılır.": "Below this window width, the chat list and the chat share one panel and open in turn.",
+  "Zamanlı mesajlar": "Scheduled messages",
+  "Bir sohbette sol alttaki saat düğmesine ya da Ctrl + Shift + Enter'a bas. Mesaj zamanında gitsin diye Wazzap? açık ve bilgisayar uyanık olmalı; 10 dakikadan fazla geciken mesaj gönderilmez, burada bekler.": "In a chat, press the clock button at the bottom left or Ctrl + Shift + Enter. For a message to go out on time, Wazzap? must be running and the computer awake; messages more than 10 minutes late are not sent and wait here.",
+  "Masaüstü": "Desktop",
+  "Kapatınca tepside çalışmaya devam etsin": "Keep running in the tray when closed",
+  "Windows açılınca arka planda başlasın": "Start in the background with Windows",
+  "Bildirim göster": "Show notifications",
+  "Bildirimde mesajın kendisini göster": "Show the message text in notifications",
+  "Ctrl + Shift + Boşluk": "Ctrl + Shift + Space",
+  "her yerden göster / gizle": "show / hide from anywhere",
+  "telefon ·": "phone ·",
+  "normal ·": "normal ·",
+  "kompakt": "compact",
+  "her zaman üstte ·": "always on top ·",
+  "bu pencere": "this window",
+  "yakınlaştırma ·": "zoom ·",
+  "sohbetten listeye": "chat back to list",
+  "yazı kutusundaki mesajı zamanla": "schedule the message in the compose box",
+  "Gelişmiş": "Advanced",
+  "Özel CSS — WhatsApp sayfasına en son eklenir": "Custom CSS — added last to the WhatsApp page",
+  "Tanılama dosyası oluştur": "Create diagnostics file",
+  "Veri klasörünü aç": "Open data folder",
+  "Güncelleme": "Update",
+  "Denetle": "Check",
+  "Güncellemeyi kur": "Install update",
+  "Tanılama dosyası yalnızca renk değişkenlerini ve sayfa yapısını içerir; mesaj, kişi adı ya da numara yazılmaz. Tema bir yerde tutmazsa bu dosyayı paylaş.": "The diagnostics file contains only colour variables and page structure; no messages, names or numbers. Share it if the theme does not fit somewhere.",
+  "· MIT lisansı": "· MIT licence",
+  "WhatsApp veya Meta ile bağlantılı değildir.": "Not affiliated with WhatsApp or Meta.",
+  "Sohbetler": "Chats",
+  "Ara veya yeni sohbet başlat": "Search or start a new chat",
+  "Tümü": "All",
+  "Okunmamış": "Unread",
+  "Gruplar": "Groups",
+  "Kostümler hazır mı?": "Are the costumes ready?",
+  "Stüdyo": "Studio",
+  "Kayıt saatini teyit ettim": "Confirmed the recording time",
+  "Dün": "Yesterday",
+  "Kapak son hali çok iyi olmuş": "The final cover looks great",
+  "Matbaa": "Print shop",
+  "Pzt": "Mon",
+  "Prova baskı hazır": "Proof print is ready",
+  "Annem": "Mum",
+  "Paz": "Sun",
+  "Akşama geliyor musun?": "Coming tonight?",
+  "yazıyor…": "typing…",
+  "Bugün": "Today",
+  "Prova 18:00'de, geç kalmayın": "Rehearsal at 18:00, don't be late",
+  "Geldim, stüdyo kapısındayım": "I'm here, at the studio door",
+  "Kostümler": "Costumes",
+  "Hazır, krom ceketler de geldi": "Ready, the chrome jackets arrived too",
+  "Fotoğrafını atıyorum şimdi": "Sending a photo now",
+  "Bir mesaj yazın": "Type a message",
+  "Telefon": "Phone",
+  "Tema adı": "Theme name",
+  "Renk seçici": "Colour picker",
+  "Ekrandan renk al": "Pick colour from screen",
+  "Hex kodu": "Hex code",
+  "Kırmızı": "Red",
+  "Yeşil": "Green",
+  "Mavi": "Blue",
+  "Kaydedildi": "Saved",
+  "Kaydedilemedi: {0}": "Could not save: {0}",
+  "Önce bir ad yaz": "Type a name first",
+  "Tema kaydedildi": "Theme saved",
+  "Tema silindi": "Theme deleted",
+  "Önizleme modunda dışa aktarılamaz": "Cannot export in preview mode",
+  "Dışa aktarıldı": "Exported",
+  "Önizleme modunda içe aktarılamaz": "Cannot import in preview mode",
+  "Tema içe aktarıldı": "Theme imported",
+  "{0} rengini düzenle": "Edit {0} colour",
+  "Zemin": "Background",
+  "Panel": "Panel",
+  "Çizgi": "Lines",
+  "Soluk yazı": "Muted text",
+  "Yazı": "Text",
+  "Vurgu": "Accent",
+  "Vurgu üstü yazı": "Text on accent",
+  "Sohbet zemini": "Chat background",
+  "Giden baloncuk": "Outgoing bubble",
+  "Giden yazı": "Outgoing text",
+  "Gelen baloncuk": "Incoming bubble",
+  "Gelen yazı": "Incoming text",
+  "Düz renk": "Solid colour",
+  "Gradyan": "Gradient",
+  "Görsel seç…": "Choose image…",
+  "Görsel hazırlanıyor": "Preparing image",
+  "Görsel açılamadı": "Could not open the image",
+  "Kompakt": "Compact",
+  "Normal": "Normal",
+  "Tanılama hazırlanıyor": "Preparing diagnostics",
+  "WhatsApp penceresi açık değil": "The WhatsApp window is not open",
+  "Tanılama kaydedildi": "Diagnostics saved",
+  "Kaydedildi: {0}": "Saved: {0}",
+  "telefon": "phone",
+  "normal": "normal",
+  "WhatsApp teması": "WhatsApp theme",
+  "WhatsApp yazı tipi": "WhatsApp font",
+  "köşe {0} px": "corners {0} px",
+  "{0} mod": "{0} mode",
+  "tek panel < {0} px": "single panel < {0} px",
+  "Bekliyor": "Waiting",
+  "Gönderiliyor": "Sending",
+  "Gönderildi": "Sent",
+  "Kaçırıldı": "Missed",
+  "Gönderilemedi": "Failed",
+  "İptal edildi": "Cancelled",
+  "Bekleyen mesaj yok.": "No pending messages.",
+  "Şimdi gönder": "Send now",
+  "İptal": "Cancel",
+  "Sil": "Delete",
+  "İndiriliyor. Kurulum bitince uygulama yeniden açılır.": "Downloading. The app restarts when installation finishes.",
+  "Güncelleniyor. Derleme birkaç dakika sürer, sonra uygulama yeniden açılır.": "Updating. Building takes a few minutes, then the app restarts.",
+  "v{0} hazır · şu an v{1}": "v{0} is ready · now v{1}",
+  "v{0} · güncel": "v{0} · up to date",
+  " (GitHub sürümleri)": " (GitHub releases)",
+  "Önizleme modu": "Preview mode",
+  "Yeni sürüm var": "New version available",
+  "Güncel": "Up to date",
+  "Güncelleniyor": "Updating",
+  "Sürüm {0} · Kısayol {1}": "Version {0} · Shortcut {1}",
+  "Otomatik": "Automatic",
+  "Siyah": "Black",
+  "Açık": "Light",
+  "Lacivert": "Navy",
+  "Özel": "Custom"
+};
+const isEn = () => !!(S && S.lang === 'en');
+const LOC = () => (isEn() ? 'en-GB' : 'tr-TR');
+function L(text, ...args){
+  let out = isEn() && EN[text] ? EN[text] : String(text);
+  args.forEach((a, i) => { out = out.split('{' + i + '}').join(String(a)); });
+  return out;
+}
+// Sayfadaki sabit metinler: açılışta Türkçe asıllarını sakla, dile göre değiştir.
+const STATIC = [];
+(function collectStatic(){
+  const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+    acceptNode: n => n.parentElement && !n.parentElement.closest('script, style, textarea') && EN[n.nodeValue.trim().replace(/\s+/g, ' ')]
+      ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT,
+  });
+  for(let n = walk.nextNode(); n; n = walk.nextNode()) STATIC.push({ node:n, orig:n.nodeValue });
+  document.querySelectorAll('[title], [placeholder], [aria-label]').forEach(e => {
+    ['title','placeholder','aria-label'].forEach(a => {
+      const v = e.getAttribute(a);
+      if(v && EN[v]) STATIC.push({ el:e, attr:a, orig:v });
+    });
+  });
+})();
+let langShown = 'tr';
+function applyLang(){
+  const lang = isEn() ? 'en' : 'tr';
+  document.documentElement.lang = lang;
+  if(lang === langShown) return;
+  langShown = lang;
+  for(const s of STATIC){
+    if(s.node){
+      const key = s.orig.trim().replace(/\s+/g, ' ');
+      const lead = s.orig.match(/^\s*/)[0], trail = s.orig.match(/\s*$/)[0];
+      s.node.nodeValue = lang === 'en' ? lead + EN[key] + trail : s.orig;
+    } else {
+      s.el.setAttribute(s.attr, lang === 'en' ? EN[s.orig] : s.orig);
+    }
+  }
+  // Dile bağlı, sonradan çizilen parçalar.
+  if(S){ buildPresets(); buildSaved(); buildSlots(); buildWall(); buildModes(); buildLang(); render(); renderSched(); }
+  if(T) invoke('update_status').then(renderUpd).catch(() => {});
+  else renderUpd({ current:'0.2.0', available:null, updating:false });
+  invoke('app_info').then(i => { if(i) $('#ver').textContent = L('Sürüm {0} · Kısayol {1}', i.version, L(i.shortcut)); }).catch(() => {});
+}
+function buildLang(){
+  const items = [{ k:'auto', name:L('Otomatik') }, { k:'tr', name:'Türkçe' }, { k:'en', name:'English' }];
+  chipGroup($('#langChips'), items, it => (S.language || 'auto') === it.k, it => {
+    S.language = it.k;
+    if(it.k !== 'auto') S.lang = it.k;
+    buildLang(); applyLang(); commit();
+  });
 }
 
 /* ================= hazır temalar ================= */
@@ -581,8 +787,8 @@ function commit(){
   if(!T) return; // tarayıcıda önizleme: kaydedecek yer yok
   saveTimer = setTimeout(() => {
     invoke('set_settings', { settings:S })
-      .then(next => { if(next){ S.mode = next.mode; } setStatus('Kaydedildi', 1600); })
-      .catch(err => setStatus('Kaydedilemedi: ' + err));
+      .then(next => { if(next){ S.mode = next.mode; } S.lang = next.lang || S.lang; applyLang(); setStatus(L('Kaydedildi'), 1600); })
+      .catch(err => setStatus(L('Kaydedilemedi: {0}', err)));
   }, 160);
 }
 
@@ -611,7 +817,7 @@ function buildPresets(){
       syncControls(); commit();
     },
     it => it.theme
-      ? swatchStrip([it.theme.bg, it.theme.panel, it.theme.outBubble, it.theme.accent]) + it.name
+      ? swatchStrip([it.theme.bg, it.theme.panel, it.theme.outBubble, it.theme.accent]) + L(it.name)
       : swatchStrip(['#111B21', '#202C33', '#005C4B', '#00A884']) + 'WhatsApp');
 }
 
@@ -644,13 +850,13 @@ function upsertSaved(theme){
 
 $('#saveTheme').onclick = () => {
   let name = $('#themeName').value.trim();
-  if(!name || name === 'Özel'){ setStatus('Önce bir ad yaz', 2500); $('#themeName').focus(); return; }
+  if(!name || name === 'Özel'){ setStatus(L('Önce bir ad yaz'), 2500); $('#themeName').focus(); return; }
   if(isPreset(name)) name += ' (özel)';
   S.themeEnabled = true;
   S.theme.name = name;
   upsertSaved(S.theme);
   syncControls(); commit();
-  setStatus('Tema kaydedildi', 2000);
+  setStatus(L('Tema kaydedildi'), 2000);
 };
 $('#themeName').addEventListener('keydown', e => { if(e.key === 'Enter') $('#saveTheme').click(); });
 $('#deleteTheme').onclick = () => {
@@ -659,16 +865,16 @@ $('#deleteTheme').onclick = () => {
   S.savedThemes.splice(i, 1);
   S.theme.name = 'Özel';
   syncControls(); commit();
-  setStatus('Tema silindi', 2000);
+  setStatus(L('Tema silindi'), 2000);
 };
 $('#exportTheme').onclick = () => {
-  if(!T){ setStatus('Önizleme modunda dışa aktarılamaz', 2500); return; }
+  if(!T){ setStatus(L('Önizleme modunda dışa aktarılamaz'), 2500); return; }
   invoke('theme_export', { theme:S.theme })
-    .then(path => { if(path) setStatus('Dışa aktarıldı', 2500); })
+    .then(path => { if(path) setStatus(L('Dışa aktarıldı'), 2500); })
     .catch(err => setStatus(String(err)));
 };
 $('#importTheme').onclick = () => {
-  if(!T){ setStatus('Önizleme modunda içe aktarılamaz', 2500); return; }
+  if(!T){ setStatus(L('Önizleme modunda içe aktarılamaz'), 2500); return; }
   invoke('theme_import')
     .then(theme => {
       if(!theme) return;
@@ -677,7 +883,7 @@ $('#importTheme').onclick = () => {
       S.themeEnabled = true;
       S.theme = JSON.parse(JSON.stringify(theme));
       syncControls(); commit();
-      setStatus('Tema içe aktarıldı', 2500);
+      setStatus(L('Tema içe aktarıldı'), 2500);
     })
     .catch(err => setStatus(String(err)));
 };
@@ -696,8 +902,8 @@ function buildSlots(){
     sw.type = 'button'; sw.className = 'swatch';
     sw.style.background = S.theme[key];
     sw.setAttribute('aria-expanded','false');
-    sw.setAttribute('aria-label', `${label} rengini düzenle`);
-    const lbl = document.createElement('span'); lbl.className = 'lbl'; lbl.textContent = label;
+    sw.setAttribute('aria-label', L('{0} rengini düzenle', L(label)));
+    const lbl = document.createElement('span'); lbl.className = 'lbl'; lbl.textContent = L(label);
     const code = document.createElement('span'); code.className = 'code2'; code.textContent = String(S.theme[key]).toUpperCase();
     sw.onclick = () => {
       if(PK.anchor === sw){ pkClose(); return; }
@@ -720,7 +926,7 @@ function wallKind(){
   return w.startsWith('url(') ? 'image' : 'gradient';
 }
 function buildWall(){
-  const items = [{ k:'none', name:'Düz renk' }, { k:'gradient', name:'Gradyan' }, { k:'image', name:'Görsel seç…' }];
+  const items = [{ k:'none', name:L('Düz renk') }, { k:'gradient', name:L('Gradyan') }, { k:'image', name:L('Görsel seç…') }];
   chipGroup($('#wallChips'), items, it => it.k === wallKind(), it => {
     if(it.k === 'none'){ S.theme.wallpaper = ''; }
     else if(it.k === 'gradient'){
@@ -737,7 +943,7 @@ $('#wallFile').addEventListener('change', async e => {
   const file = e.target.files && e.target.files[0];
   e.target.value = '';
   if(!file) return;
-  setStatus('Görsel hazırlanıyor');
+  setStatus(L('Görsel hazırlanıyor'));
   try{
     const bmp = await createImageBitmap(file);
     const scale = Math.min(1, 1920 / Math.max(bmp.width, bmp.height));
@@ -747,13 +953,13 @@ $('#wallFile').addEventListener('change', async e => {
     const url = c.toDataURL('image/jpeg', 0.86);
     S.theme.wallpaper = `url("${url}")`;
     markCustom(); buildWall(); commit();
-  }catch(err){ setStatus('Görsel açılamadı'); }
+  }catch(err){ setStatus(L('Görsel açılamadı')); }
 });
 
 /* ================= düzen ================= */
-const MODES = [{ k:'phone', name:'Telefon' }, { k:'compact', name:'Kompakt' }, { k:'normal', name:'Normal' }];
+const MODES = () => [{ k:'phone', name:L('Telefon') }, { k:'compact', name:L('Kompakt') }, { k:'normal', name:L('Normal') }];
 function buildModes(){
-  chipGroup($('#modeChips'), MODES, it => it.k === S.mode, it => {
+  chipGroup($('#modeChips'), MODES(), it => it.k === S.mode, it => {
     S.mode = it.k; buildModes();
     invoke('set_mode_cmd', { mode:it.k }).catch(() => {});
   });
@@ -804,7 +1010,8 @@ $('#customCss').addEventListener('input', e => {
 
 function syncControls(){
   if(!S.savedThemes) S.savedThemes = [];
-  buildPresets(); buildSaved(); buildSlots(); buildWall(); buildModes();
+  buildPresets(); buildSaved(); buildSlots(); buildWall(); buildModes(); buildLang();
+  applyLang();
   syncers.forEach(f => f());
   $('#font').value = S.theme.font || 'Inter';
   if(document.activeElement !== $('#customCss')) $('#customCss').value = S.customCss || '';
@@ -813,18 +1020,18 @@ function syncControls(){
 
 /* ================= gelişmiş ================= */
 $('#diagBtn').onclick = () => {
-  setStatus('Tanılama hazırlanıyor');
-  invoke('run_diagnostics').catch(err => setStatus('WhatsApp penceresi açık değil'));
+  setStatus(L('Tanılama hazırlanıyor'));
+  invoke('run_diagnostics').catch(err => setStatus(L('WhatsApp penceresi açık değil')));
 };
 $('#folderBtn').onclick = () => invoke('open_data_dir').catch(() => {});
 listen('diag-saved', path => {
-  setStatus('Tanılama kaydedildi', 4000);
-  $('#diagNote').textContent = 'Kaydedildi: ' + path;
+  setStatus(L('Tanılama kaydedildi'), 4000);
+  $('#diagNote').textContent = L('Kaydedildi: {0}', path);
 });
 listen('settings-changed', next => {
   if(!next || !S) return;
   // Pencere tarafında değişen alanlar: mod, yakınlaştırma, her zaman üstte.
-  ['mode','zoom','phoneZoom','alwaysOnTop','phoneOnTop'].forEach(k => S[k] = next[k]);
+  ['mode','zoom','phoneZoom','alwaysOnTop','phoneOnTop','lang'].forEach(k => S[k] = next[k]);
   syncControls();
 });
 
@@ -849,13 +1056,13 @@ function render(){
   waEl.querySelectorAll('.b').forEach(b => b.classList.toggle('tail', !(S.themeEnabled && t.hideTails) && b.dataset.tail !== '0'));
   waEl.dataset.view = view;
   fit();
-  const modeName = { phone:'telefon', compact:'kompakt', normal:'normal' }[S.mode] || S.mode;
+  const modeName = { phone:L('telefon'), compact:L('kompakt'), normal:L('normal') }[S.mode] || S.mode;
   $('#meta').textContent = [
-    S.themeEnabled ? S.theme.name : 'WhatsApp teması',
-    S.themeEnabled ? (t.font === 'WhatsApp' ? 'WhatsApp yazı tipi' : t.font) : null,
-    S.themeEnabled && t.radius ? `köşe ${t.radius} px` : null,
-    `${modeName} mod`,
-    `tek panel < ${S.phoneBreakpoint} px`,
+    S.themeEnabled ? L(S.theme.name) : L('WhatsApp teması'),
+    S.themeEnabled ? (t.font === 'WhatsApp' ? L('WhatsApp yazı tipi') : t.font) : null,
+    S.themeEnabled && t.radius ? L('köşe {0} px', t.radius) : null,
+    L('{0} mod', modeName),
+    L('tek panel < {0} px', S.phoneBreakpoint),
   ].filter(Boolean).join(' · ');
 }
 // Son baloncuk ardışık mesaj: kuyruksuz
@@ -884,7 +1091,7 @@ viewChips.addEventListener('click', e => {
 let SCHED = [];
 const STATE_TR = { bekliyor:'Bekliyor', gonderiliyor:'Gönderiliyor', gonderildi:'Gönderildi', kacirildi:'Kaçırıldı',
   hata:'Gönderilemedi', iptal:'İptal edildi' };
-const fmtWhen = ms => new Date(ms).toLocaleString('tr-TR', { day:'numeric', month:'short', weekday:'short', hour:'2-digit', minute:'2-digit' });
+const fmtWhen = ms => new Date(ms).toLocaleString(LOC(), { day:'numeric', month:'short', weekday:'short', hour:'2-digit', minute:'2-digit' });
 const el = (tag, cls, text) => { const e = document.createElement(tag); if(cls) e.className = cls; if(text != null) e.textContent = text; return e; };
 
 function schedAction(id, action){
@@ -897,18 +1104,18 @@ function renderSched(){
   const open = SCHED.filter(i => ['bekliyor','gonderiliyor','kacirildi','hata'].includes(i.status)).sort((a,b) => a.due - b.due);
   const done = SCHED.filter(i => ['gonderildi','iptal'].includes(i.status))
     .sort((a,b) => (b.sentAt || b.due) - (a.sentAt || a.due)).slice(0, 8);
-  if(!open.length && !done.length){ wrap.append(el('div', 'sempty', 'Bekleyen mesaj yok.')); return; }
+  if(!open.length && !done.length){ wrap.append(el('div', 'sempty', L('Bekleyen mesaj yok.'))); return; }
   const row = it => {
     const r = el('div', 'sitem');
     const top = el('div', 'stop');
     top.append(el('span', 'schat', it.chat), el('span', 'stime', fmtWhen(it.status === 'gonderildi' && it.sentAt ? it.sentAt : it.due)));
     const foot = el('div', 'sfoot');
-    const state = STATE_TR[it.status] || it.status;
+    const state = STATE_TR[it.status] ? L(STATE_TR[it.status]) : it.status;
     foot.append(el('span', 'sstate', it.error && it.status !== 'bekliyor' ? `${state} · ${it.error}` : state));
     const btn = (label, action) => { const b = el('button', 'sbtn', label); b.type = 'button'; b.onclick = () => schedAction(it.id, action); foot.append(b); };
-    if(['kacirildi','hata'].includes(it.status)) btn('Şimdi gönder', 'send-now');
-    if(it.status === 'bekliyor') { btn('Şimdi gönder', 'send-now'); btn('İptal', 'cancel'); }
-    if(['kacirildi','hata','gonderildi','iptal'].includes(it.status)) btn('Sil', 'delete');
+    if(['kacirildi','hata'].includes(it.status)) btn(L('Şimdi gönder'), 'send-now');
+    if(it.status === 'bekliyor') { btn(L('Şimdi gönder'), 'send-now'); btn(L('İptal'), 'cancel'); }
+    if(['kacirildi','hata','gonderildi','iptal'].includes(it.status)) btn(L('Sil'), 'delete');
     r.append(top, el('div', 'stext', it.text), foot);
     return r;
   };
@@ -927,18 +1134,18 @@ function renderUpd(u){
   if(!u) return;
   const t = $('#updText');
   const gh = u.source === 'github';
-  if(u.updating) t.textContent = gh ? 'İndiriliyor. Kurulum bitince uygulama yeniden açılır.'
-    : 'Güncelleniyor. Derleme birkaç dakika sürer, sonra uygulama yeniden açılır.';
-  else if(u.available) t.textContent = `v${u.available} hazır · şu an v${u.current}`;
-  else t.textContent = `v${u.current} · güncel` + (gh ? ' (GitHub sürümleri)' : '');
+  if(u.updating) t.textContent = gh ? L('İndiriliyor. Kurulum bitince uygulama yeniden açılır.')
+    : L('Güncelleniyor. Derleme birkaç dakika sürer, sonra uygulama yeniden açılır.');
+  else if(u.available) t.textContent = L('v{0} hazır · şu an v{1}', u.available, u.current);
+  else t.textContent = L('v{0} · güncel', u.current) + (gh ? L(' (GitHub sürümleri)') : '');
   $('#updInstall').hidden = !u.available || u.updating;
 }
 $('#updCheck').onclick = () => {
-  if(!T){ setStatus('Önizleme modu', 2000); return; }
-  invoke('update_status').then(u => { renderUpd(u); setStatus(u && u.available ? 'Yeni sürüm var' : 'Güncel', 2000); }).catch(err => setStatus(String(err)));
+  if(!T){ setStatus(L('Önizleme modu'), 2000); return; }
+  invoke('update_status').then(u => { renderUpd(u); setStatus(u && u.available ? L('Yeni sürüm var') : L('Güncel'), 2000); }).catch(err => setStatus(String(err)));
 };
 $('#updInstall').onclick = () => {
-  invoke('update_install').then(() => setStatus('Güncelleniyor')).catch(err => setStatus(String(err), 4000));
+  invoke('update_install').then(() => setStatus(L('Güncelleniyor'))).catch(err => setStatus(String(err), 4000));
 };
 listen('update-status', renderUpd);
 
@@ -949,9 +1156,9 @@ const DEMO = {
 };
 invoke('get_settings')
   .then(s => { S = s; syncControls(); })
-  .catch(() => { S = JSON.parse(JSON.stringify(DEMO)); syncControls(); setStatus('Önizleme modu'); });
+  .catch(() => { S = JSON.parse(JSON.stringify(DEMO)); syncControls(); setStatus(L('Önizleme modu')); });
 loadSched();
 if(T) invoke('update_status').then(renderUpd).catch(() => {});
 else renderUpd({ current:'0.2.0', available:null, updating:false, project:'C:\\Users\\…\\Wazzap' });
-invoke('app_info').then(i => { if(i) $('#ver').textContent = `Sürüm ${i.version} · Kısayol ${i.shortcut}`; }).catch(() => {});
+invoke('app_info').then(i => { if(i) $('#ver').textContent = L('Sürüm {0} · Kısayol {1}', i.version, L(i.shortcut)); }).catch(() => {});
 </script>

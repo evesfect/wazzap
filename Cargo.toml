@@ -1,6 +1,6 @@
 [package]
 name = "wazzap"
-version = "0.3.6"
+version = "0.4.0"
 description = "Lightweight Windows desktop client for WhatsApp Web"
 license = "MIT"
 edition = "2024"
@@ -17,6 +17,7 @@ tauri-plugin-notification = "2"
 tauri-plugin-opener = "2"
 tauri-plugin-single-instance = "2"
 tauri-plugin-updater = "2"
+sys-locale = "0.3"
 
 [build-dependencies]
 tauri-build = "2"

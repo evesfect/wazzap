@@ -514,6 +514,15 @@ with sync_playwright() as p:
     check("linkler tarayıcıda açılıyor (tık, boş pencere, window.open)", opened == ["https://example.com/x?y=1", "https://example.org/", "http://example.net/"] and w == [True, True], str(opened))
     check("link sayfayı değiştirmedi", page.evaluate("location.protocol") != "https:" or "example" not in page.evaluate("location.href"))
 
+    # --- İngilizce arayüz
+    page.evaluate("""() => { const s = JSON.parse(JSON.stringify(window.__WAP_BOOT__.settings)); s.lang = 'en'; window.__wap.apply(s); }""")
+    page.wait_for_timeout(300)
+    en = page.evaluate("[document.querySelector('.wap-cap').title, (document.querySelector('.wap-fab:not(.wap-fab-media)') || {}).title || '', document.querySelector('.wap-cap-close').title]")
+    check("İngilizce: başlık çubuğu ve saat düğmesi İngilizce", en[0] == "Minimise" and en[2] == "Close" and en[1].startswith("Scheduled message"), str(en))
+    page.evaluate("""() => { const s = JSON.parse(JSON.stringify(window.__WAP_BOOT__.settings)); s.lang = 'tr'; window.__wap.apply(s); }""")
+    page.wait_for_timeout(300)
+    check("Türkçeye geri döndü", page.evaluate("document.querySelector('.wap-cap').title") == "Alta al")
+
     check("tanılamadan sonra tema yerinde", page.evaluate("document.adoptedStyleSheets.length") >= 4)
     check("sayfa hatası yok", not errors, " | ".join(errors[:5]))
     browser.close()

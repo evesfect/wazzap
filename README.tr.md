@@ -24,6 +24,8 @@ denetler ve tek tıkla kurar.
 Kurulum dosyası imzalı olmadığı için Windows ilk açılışta "Windows bilgisayarınızı korudu"
 uyarısı gösterebilir: **Ek bilgi → Yine de çalıştır**.
 
+Arayüz Türkçe ve İngilizce. Windows'un diline göre açılır; Ayarlar → Masaüstü'nden değiştirilebilir.
+
 ### Kaynaktan derleme
 
 `derle.bat` dosyasına çift tıkla. Betik ilk seferde eksikse **Rust** ve **Visual Studio C++

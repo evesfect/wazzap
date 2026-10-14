@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod badge;
+mod i18n;
 mod schedule;
 mod settings;
 mod update;
@@ -61,7 +62,9 @@ struct AppState {
 
 impl AppState {
     fn snapshot(&self) -> Settings {
-        self.settings.lock().unwrap().clone()
+        let mut s = self.settings.lock().unwrap().clone();
+        s.lang = i18n::resolve(&s.language).into();
+        s
     }
     fn save(&self) {
         let s = self.snapshot();
@@ -186,6 +189,35 @@ fn init_script(s: &Settings) -> String {
 }
 
 /// Güncel ayarları açık WhatsApp sayfasına uygular (tema, düzen, yakınlaştırma).
+/// Geçerli arayüz dili ("tr" / "en").
+fn lang(app: &AppHandle) -> String {
+    state(app).snapshot().lang
+}
+
+/// Arayüz metnini geçerli dile çevirir.
+fn t(app: &AppHandle, text: &str, args: &[&str]) -> String {
+    i18n::t(&lang(app), text, args)
+}
+
+/// Kullanıcıya dönen hata metnini geçerli dile çevirir.
+fn tx_err(app: &AppHandle, text: &str) -> String {
+    i18n::err(&lang(app), text)
+}
+
+/// Zamanlı mesaj kayıtlarındaki hata metinlerini geçerli dile çevirir.
+fn localized(app: &AppHandle, items: Vec<schedule::Item>) -> Vec<schedule::Item> {
+    let l = lang(app);
+    items
+        .into_iter()
+        .map(|mut it| {
+            if let Some(e) = &it.error {
+                it.error = Some(i18n::err(&l, e));
+            }
+            it
+        })
+        .collect()
+}
+
 /// Sayfadaki başlık çubuğuna pencerenin tam ekran olup olmadığını bildirir (yalnızca değişince).
 fn push_window_state(app: &AppHandle) {
     let Some(w) = main_window(app) else { return };
@@ -385,7 +417,7 @@ fn open_settings(app: &AppHandle) {
         return;
     }
     let _ = WebviewWindowBuilder::new(app, SETTINGS_WIN, WebviewUrl::App("index.html".into()))
-        .title("Wazzap? · Ayarlar")
+        .title(format!("Wazzap? · {}", t(app, "Ayarlar", &[])))
         .inner_size(1120.0, 760.0)
         .min_inner_size(720.0, 520.0)
         .background_color(tauri::window::Color(0, 0, 0, 255))
@@ -473,12 +505,12 @@ fn run_action(app: &AppHandle, action: &str) {
         "update" => {
             if state(app).update_version.lock().unwrap().is_some() {
                 if let Err(e) = start_update(app) {
-                    notify(app, "Güncelleme başlatılamadı", &e, Click::Settings);
+                    notify(app, &t(app, "Güncelleme başlatılamadı", &[]), &tx_err(app, &e), Click::Settings);
                 }
             } else if update::project_dir().is_none() {
                 github_check(app, true, true);
             } else if check_update(app, false).is_none() {
-                notify(app, "Wazzap? güncel", &format!("Sürüm {}", env!("CARGO_PKG_VERSION")), Click::Show);
+                notify(app, &t(app, "Wazzap? güncel", &[]), &t(app, "Sürüm {0}", &[env!("CARGO_PKG_VERSION")]), Click::Show);
             }
         }
         "quit" => {
@@ -520,7 +552,7 @@ fn set_unread(app: &AppHandle, count: u32) {
     if let Some(tray) = app.tray_by_id(TRAY) {
         let _ = tray.set_icon(Some(tray_image(count > 0)));
         let tip = if count > 0 {
-            format!("Wazzap? · {count} okunmamış")
+            t(app, "Wazzap? · {0} okunmamış", &[&count.to_string()])
         } else {
             "Wazzap?".to_string()
         };
@@ -579,7 +611,7 @@ fn wa_event(app: AppHandle, kind: String, data: serde_json::Value) -> Result<(),
             let body = if s.notify_preview {
                 data.get("body").and_then(|v| v.as_str()).unwrap_or("").to_string()
             } else {
-                "Yeni mesaj".to_string()
+                t(&app, "Yeni mesaj", &[])
             };
             notify(&app, title, &body, Click::Chat(title.to_string()));
         }
@@ -633,7 +665,7 @@ fn wa_settings(app: AppHandle) -> Settings {
 
 fn schedules_changed(app: &AppHandle) {
     let items = state(app).schedules.lock().unwrap().items.clone();
-    let _ = app.emit_to(SETTINGS_WIN, "schedules-changed", items);
+    let _ = app.emit_to(SETTINGS_WIN, "schedules-changed", localized(app, items));
     // Sohbetteki önizleme baloncukları da yenilensin.
     if let Some(w) = main_window(app) {
         let _ = w.eval("window.__wap && window.__wap.schedulesChanged();");
@@ -660,13 +692,13 @@ fn scheduler_tick(app: &AppHandle) {
     for id in &tick.missed {
         if let Some(it) = find(id) {
             log(app, &format!("zamanlı mesaj kaçırıldı ({id})"));
-            notify(app, "Zamanlı mesaj kaçırıldı", &format!("{} · göndermek için ayarlara bak", it.chat), Click::Settings);
+            notify(app, &t(app, "Zamanlı mesaj kaçırıldı", &[]), &t(app, "{0} · göndermek için ayarlara bak", &[&it.chat]), Click::Settings);
         }
     }
     for id in &tick.timed_out {
         if let Some(it) = find(id) {
             log(app, &format!("zamanlı mesaj zaman aşımı ({id})"));
-            notify(app, "Zamanlı mesaj gönderilemedi", &format!("{} · WhatsApp yanıt vermedi", it.chat), Click::Chat(it.chat.clone()));
+            notify(app, &t(app, "Zamanlı mesaj gönderilemedi", &[]), &t(app, "{0} · WhatsApp yanıt vermedi", &[&it.chat]), Click::Chat(it.chat.clone()));
         }
     }
     if let Some(id) = &tick.send {
@@ -725,11 +757,11 @@ fn schedule_result(app: &AppHandle, data: &serde_json::Value) {
     match outcome {
         Some((true, chat)) => {
             log(app, &format!("zamanlı mesaj gönderildi ({id})"));
-            notify(app, "Zamanlı mesaj gönderildi", &chat, Click::Chat(chat.clone()));
+            notify(app, &t(app, "Zamanlı mesaj gönderildi", &[]), &chat, Click::Chat(chat.clone()));
         }
         Some((false, chat)) => {
             log(app, &format!("zamanlı mesaj hata ({id}): {error}"));
-            notify(app, "Zamanlı mesaj gönderilemedi", &format!("{chat} · {error}"), Click::Settings);
+            notify(app, &t(app, "Zamanlı mesaj gönderilemedi", &[]), &format!("{chat} · {}", tx_err(app, &error)), Click::Settings);
         }
         None => {}
     }
@@ -739,6 +771,10 @@ fn schedule_result(app: &AppHandle, data: &serde_json::Value) {
 /// WhatsApp sayfasından: sohbetteki zamanlama paneli.
 #[tauri::command]
 fn wa_schedule(app: AppHandle, action: String, data: serde_json::Value) -> Result<serde_json::Value, String> {
+    wa_schedule_inner(app.clone(), action, data).map_err(|e| tx_err(&app, &e))
+}
+
+fn wa_schedule_inner(app: AppHandle, action: String, data: serde_json::Value) -> Result<serde_json::Value, String> {
     let st = state(&app);
     let s = |k: &str| data.get(k).and_then(|v| v.as_str()).unwrap_or_default().to_string();
     let result = {
@@ -762,7 +798,8 @@ fn wa_schedule(app: AppHandle, action: String, data: serde_json::Value) -> Resul
                     .filter(|it| matches!(it.status, Status::Bekliyor | Status::Gonderiliyor | Status::Kacirildi | Status::Hata))
                     .cloned()
                     .collect();
-                return serde_json::to_value(items).map_err(|e| e.to_string());
+                drop(store);
+                return serde_json::to_value(localized(&app, items)).map_err(|e| e.to_string());
             }
             "cancel" | "send-now" => {
                 let id = s("id");
@@ -813,11 +850,16 @@ fn wa_schedule(app: AppHandle, action: String, data: serde_json::Value) -> Resul
 /// Ayarlar penceresi: bütün zamanlı mesajlar.
 #[tauri::command]
 fn schedules(app: AppHandle) -> Vec<schedule::Item> {
-    state(&app).schedules.lock().unwrap().items.clone()
+    let items = state(&app).schedules.lock().unwrap().items.clone();
+    localized(&app, items)
 }
 
 #[tauri::command]
 fn schedule_action(app: AppHandle, id: String, action: String) -> Result<(), String> {
+    schedule_action_inner(app.clone(), id, action).map_err(|e| tx_err(&app, &e))
+}
+
+fn schedule_action_inner(app: AppHandle, id: String, action: String) -> Result<(), String> {
     {
         let st = state(&app);
         let mut store = st.schedules.lock().unwrap();
@@ -891,6 +933,10 @@ fn unique_path(dir: &std::path::Path, name: &str) -> PathBuf {
 /// WhatsApp sayfasından: medya kaydetme, belge indirme hedefi, klasörü açma.
 #[tauri::command]
 fn wa_media(app: AppHandle, action: String, data: serde_json::Value) -> Result<serde_json::Value, String> {
+    wa_media_inner(app.clone(), action, data).map_err(|e| tx_err(&app, &e))
+}
+
+fn wa_media_inner(app: AppHandle, action: String, data: serde_json::Value) -> Result<serde_json::Value, String> {
     let s = |k: &str| data.get(k).and_then(|v| v.as_str()).unwrap_or_default().to_string();
     match action.as_str() {
         "save" => {
@@ -927,6 +973,10 @@ fn wa_media(app: AppHandle, action: String, data: serde_json::Value) -> Result<s
 
 #[tauri::command]
 async fn theme_export(app: AppHandle, theme: Theme) -> Result<Option<String>, String> {
+    theme_export_inner(app.clone(), theme).await.map_err(|e| tx_err(&app, &e))
+}
+
+async fn theme_export_inner(app: AppHandle, theme: Theme) -> Result<Option<String>, String> {
     use tauri_plugin_dialog::DialogExt;
     let theme = theme.sanitized();
     let file_name: String = theme
@@ -937,8 +987,8 @@ async fn theme_export(app: AppHandle, theme: Theme) -> Result<Option<String>, St
     let picked = app
         .dialog()
         .file()
-        .set_title("Temayı dışa aktar")
-        .add_filter("Wazzap? teması", &["wptema"])
+        .set_title(t(&app, "Temayı dışa aktar", &[]))
+        .add_filter(t(&app, "Wazzap? teması", &[]), &["wptema"])
         .set_file_name(format!("{}.wptema", file_name.trim()))
         .blocking_save_file();
     let Some(fp) = picked else { return Ok(None) };
@@ -951,12 +1001,16 @@ async fn theme_export(app: AppHandle, theme: Theme) -> Result<Option<String>, St
 
 #[tauri::command]
 async fn theme_import(app: AppHandle) -> Result<Option<Theme>, String> {
+    theme_import_inner(app.clone()).await.map_err(|e| tx_err(&app, &e))
+}
+
+async fn theme_import_inner(app: AppHandle) -> Result<Option<Theme>, String> {
     use tauri_plugin_dialog::DialogExt;
     let picked = app
         .dialog()
         .file()
-        .set_title("Tema dosyası seç")
-        .add_filter("Wazzap? teması", &["wptema", "json"])
+        .set_title(t(&app, "Tema dosyası seç", &[]))
+        .add_filter(t(&app, "Wazzap? teması", &[]), &["wptema", "json"])
         .blocking_pick_file();
     let Some(fp) = picked else { return Ok(None) };
     let path = fp.into_path().map_err(|e| e.to_string())?;
@@ -996,11 +1050,11 @@ fn refresh_update_ui(app: &AppHandle) {
     let updating = st.updating.load(Ordering::SeqCst);
     if let Some(item) = st.update_item.lock().unwrap().as_ref() {
         let text = if updating {
-            "Güncelleniyor…".to_string()
+            t(app, "Güncelleniyor…", &[])
         } else if let Some(v) = &available {
-            format!("Güncellemeyi kur · v{v}")
+            t(app, "Güncellemeyi kur · v{0}", &[v])
         } else {
-            "Güncellemeleri denetle".to_string()
+            t(app, "Güncellemeleri denetle", &[])
         };
         let _ = item.set_text(text);
         let _ = item.set_enabled(!updating);
@@ -1027,7 +1081,7 @@ fn check_update(app: &AppHandle, notify_user: bool) -> Option<String> {
             *notified = Some(v.clone());
             drop(notified);
             log(app, &format!("güncelleme hazır: {v}"));
-            notify(app, &format!("Wazzap? v{v} hazır"), "Kurmak için tıkla. Birkaç dakika sürer, sonra uygulama yeniden açılır.", Click::Settings);
+            notify(app, &t(app, "Wazzap? v{0} hazır", &[v]), &t(app, "Kurmak için tıkla. Birkaç dakika sürer, sonra uygulama yeniden açılır.", &[]), Click::Settings);
         }
     }
     found
@@ -1060,7 +1114,7 @@ fn github_check(app: &AppHandle, notify_user: bool, announce_none: bool) {
                     *notified = Some(v.clone());
                     drop(notified);
                     log(&app, &format!("güncelleme hazır (GitHub): {v}"));
-                    notify(&app, &format!("Wazzap? v{v} hazır"), "Kurmak için tıkla. İndirilir, sonra uygulama yeniden açılır.", Click::Settings);
+                    notify(&app, &t(&app, "Wazzap? v{0} hazır", &[&v]), &t(&app, "Kurmak için tıkla. İndirilir, sonra uygulama yeniden açılır.", &[]), Click::Settings);
                 }
             }
             Ok(None) => {
@@ -1068,13 +1122,13 @@ fn github_check(app: &AppHandle, notify_user: bool, announce_none: bool) {
                 *st.github_update.lock().unwrap() = None;
                 refresh_update_ui(&app);
                 if announce_none {
-                    notify(&app, "Wazzap? güncel", &format!("Sürüm {}", env!("CARGO_PKG_VERSION")), Click::Show);
+                    notify(&app, &t(&app, "Wazzap? güncel", &[]), &t(&app, "Sürüm {0}", &[env!("CARGO_PKG_VERSION")]), Click::Show);
                 }
             }
             Err(e) => {
                 log(&app, &format!("güncelleme denetlenemedi: {e}"));
                 if announce_none {
-                    notify(&app, "Güncelleme denetlenemedi", "İnternet bağlantısını kontrol et.", Click::Settings);
+                    notify(&app, &t(&app, "Güncelleme denetlenemedi", &[]), &t(&app, "İnternet bağlantısını kontrol et.", &[]), Click::Settings);
                 }
             }
         }
@@ -1091,7 +1145,7 @@ fn start_github_update(app: &AppHandle) -> Result<(), String> {
     log(app, &format!("GitHub güncellemesi indiriliyor: {}", update.version));
     refresh_update_ui(app);
     if let Some(tray) = app.tray_by_id(TRAY) {
-        let _ = tray.set_tooltip(Some("Wazzap? · güncelleniyor"));
+        let _ = tray.set_tooltip(Some(t(app, "Wazzap? · güncelleniyor", &[])));
     }
     let app = app.clone();
     tauri::async_runtime::spawn(async move {
@@ -1104,7 +1158,7 @@ fn start_github_update(app: &AppHandle) -> Result<(), String> {
                 st.updating.store(false, Ordering::SeqCst);
                 refresh_update_ui(&app);
                 log(&app, &format!("güncelleme kurulamadı: {e}"));
-                notify(&app, "Güncelleme kurulamadı", &e.to_string(), Click::Settings);
+                notify(&app, &t(&app, "Güncelleme kurulamadı", &[]), &e.to_string(), Click::Settings);
             }
         }
     });
@@ -1126,7 +1180,7 @@ fn start_update(app: &AppHandle) -> Result<(), String> {
     log(app, "güncelleme başlatıldı");
     refresh_update_ui(app);
     if let Some(tray) = app.tray_by_id(TRAY) {
-        let _ = tray.set_tooltip(Some("Wazzap? · güncelleniyor"));
+        let _ = tray.set_tooltip(Some(t(app, "Wazzap? · güncelleniyor", &[])));
     }
     match spawn_update(&dir, &log_path) {
         Ok(mut child) => {
@@ -1139,7 +1193,7 @@ fn start_update(app: &AppHandle) -> Result<(), String> {
                 refresh_update_ui(&handle);
                 if !ok {
                     log(&handle, "güncelleme derlenemedi");
-                    notify(&handle, "Güncelleme kurulamadı", "Ayrıntı: tanilama/guncelleme.log", Click::Settings);
+                    notify(&handle, &t(&handle, "Güncelleme kurulamadı", &[]), &t(&handle, "Ayrıntı: tanilama/guncelleme.log", &[]), Click::Settings);
                 }
             });
             Ok(())
@@ -1181,6 +1235,10 @@ fn update_status(app: AppHandle) -> serde_json::Value {
 
 #[tauri::command]
 fn update_install(app: AppHandle) -> Result<(), String> {
+    update_install_inner(app.clone()).map_err(|e| tx_err(&app, &e))
+}
+
+fn update_install_inner(app: AppHandle) -> Result<(), String> {
     if check_update(&app, false).is_none() {
         return Err("Kurulacak yeni sürüm yok".into());
     }
@@ -1199,6 +1257,7 @@ fn get_settings(app: AppHandle) -> Settings {
 #[tauri::command]
 fn set_settings(app: AppHandle, settings: Settings) -> Settings {
     let autostart_changed;
+    let language_changed;
     {
         let st = state(&app);
         let mut s = st.settings.lock().unwrap();
@@ -1207,12 +1266,16 @@ fn set_settings(app: AppHandle, settings: Settings) -> Settings {
         next.mode = s.mode.clone();
         next.normal_bounds = s.normal_bounds;
         autostart_changed = next.autostart != s.autostart;
+        language_changed = next.language != s.language;
         *s = next;
     }
     if autostart_changed {
         let on = state(&app).snapshot().autostart;
         let al = app.autolaunch();
         let _ = if on { al.enable() } else { al.disable() };
+    }
+    if language_changed {
+        rebuild_menu(&app);
     }
     apply_on_top(&app);
     push_to_page(&app);
@@ -1379,20 +1442,21 @@ fn build_main(app: &AppHandle, s: &Settings) -> tauri::Result<WebviewWindow> {
     Ok(w)
 }
 
-fn build_tray(app: &AppHandle) -> tauri::Result<TrayIcon> {
+fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
     let s = state(app).snapshot();
     let on = s.on_top();
-    let toggle = MenuItem::with_id(app, "toggle", "Göster / gizle", true, Some("Ctrl+Shift+Space"))?;
-    let phone = MenuItem::with_id(app, "phone", "Telefon modu", true, Some("Ctrl+1"))?;
-    let compact = MenuItem::with_id(app, "compact", "Kompakt", true, Some("Ctrl+3"))?;
-    let normal = MenuItem::with_id(app, "normal", "Normal mod", true, Some("Ctrl+2"))?;
-    let mini = MenuItem::with_id(app, "mini", "Mini pencere", true, Some("Ctrl+4"))?;
-    let ontop = CheckMenuItem::with_id(app, "ontop", "Her zaman üstte", true, on, Some("Ctrl+T"))?;
-    let settings = MenuItem::with_id(app, "settings", "Ayarlar ve tema", true, Some("Ctrl+,"))?;
-    let reload = MenuItem::with_id(app, "reload", "Yeniden yükle", true, None::<&str>)?;
-    let devtools = MenuItem::with_id(app, "devtools", "Geliştirici araçları", true, None::<&str>)?;
-    let update = MenuItem::with_id(app, "update", "Güncellemeleri denetle", true, None::<&str>)?;
-    let quit = MenuItem::with_id(app, "quit", "Çıkış", true, None::<&str>)?;
+    let l = |x: &str| t(app, x, &[]);
+    let toggle = MenuItem::with_id(app, "toggle", l("Göster / gizle"), true, Some("Ctrl+Shift+Space"))?;
+    let phone = MenuItem::with_id(app, "phone", l("Telefon modu"), true, Some("Ctrl+1"))?;
+    let compact = MenuItem::with_id(app, "compact", l("Kompakt"), true, Some("Ctrl+3"))?;
+    let normal = MenuItem::with_id(app, "normal", l("Normal mod"), true, Some("Ctrl+2"))?;
+    let mini = MenuItem::with_id(app, "mini", l("Mini pencere"), true, Some("Ctrl+4"))?;
+    let ontop = CheckMenuItem::with_id(app, "ontop", l("Her zaman üstte"), true, on, Some("Ctrl+T"))?;
+    let settings = MenuItem::with_id(app, "settings", l("Ayarlar ve tema"), true, Some("Ctrl+,"))?;
+    let reload = MenuItem::with_id(app, "reload", l("Yeniden yükle"), true, None::<&str>)?;
+    let devtools = MenuItem::with_id(app, "devtools", l("Geliştirici araçları"), true, None::<&str>)?;
+    let update = MenuItem::with_id(app, "update", l("Güncellemeleri denetle"), true, None::<&str>)?;
+    let quit = MenuItem::with_id(app, "quit", l("Çıkış"), true, None::<&str>)?;
     let sep = || PredefinedMenuItem::separator(app);
     let menu = Menu::with_items(
         app,
@@ -1403,6 +1467,19 @@ fn build_tray(app: &AppHandle) -> tauri::Result<TrayIcon> {
     )?;
     *state(app).ontop_item.lock().unwrap() = Some(ontop);
     *state(app).update_item.lock().unwrap() = Some(update);
+    Ok(menu)
+}
+
+/// Dil değişince tepsi menüsünü yeni dille kurar.
+fn rebuild_menu(app: &AppHandle) {
+    if let (Some(tray), Ok(menu)) = (app.tray_by_id(TRAY), build_menu(app)) {
+        let _ = tray.set_menu(Some(menu));
+        refresh_update_ui(app);
+    }
+}
+
+fn build_tray(app: &AppHandle) -> tauri::Result<TrayIcon> {
+    let menu = build_menu(app)?;
 
     TrayIconBuilder::with_id(TRAY)
         .icon(tray_image(false))
@@ -1563,7 +1640,7 @@ fn main() {
 
             log(&handle, &format!("başladı, sürüm {}", env!("CARGO_PKG_VERSION")));
             build_tray(&handle)?;
-            let w = build_main(&handle, &settings)?;
+            let w = build_main(&handle, &state(&handle).snapshot())?;
 
             // Kaydedilen modla aç.
             let mode = settings.mode.clone();

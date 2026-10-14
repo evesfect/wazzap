@@ -156,6 +156,11 @@ pub struct Settings {
     pub custom_css: String,
     /// Kullanıcının kaydettiği temalar (ayarlarda çip olarak görünür).
     pub saved_themes: Vec<Theme>,
+    /// Arayüz dili: "auto" (Windows'un diline göre) / "tr" / "en".
+    pub language: String,
+    /// Çözülmüş dil ("tr" / "en"); kaydedilmez, sayfaya ve ayarlar penceresine gider.
+    #[serde(skip_deserializing)]
+    pub lang: String,
 }
 
 impl Default for Settings {
@@ -178,6 +183,8 @@ impl Default for Settings {
             normal_bounds: None,
             custom_css: String::new(),
             saved_themes: Vec::new(),
+            language: "auto".into(),
+            lang: String::new(),
         }
     }
 }
@@ -214,6 +221,9 @@ impl Settings {
     }
 
     pub fn sanitized(mut self) -> Settings {
+        if !matches!(self.language.as_str(), "auto" | "tr" | "en") {
+            self.language = "auto".into();
+        }
         self.zoom = self.zoom.clamp(50, 200);
         self.phone_zoom = self.phone_zoom.clamp(50, 200);
         self.phone_breakpoint = self.phone_breakpoint.clamp(320, 1200);
