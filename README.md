@@ -102,8 +102,8 @@ CHROMIUM=/path/to/chrome python3 tests/bridge_test.py . /tmp/shots
 
 ### Releasing
 
-Bump the version in `Cargo.toml` and `tauri.conf.json`, then push a tag starting with `v`
-(`git tag v0.3.1 && git push --tags`). GitHub Actions builds the installer and publishes it to
+Bump the version in `Cargo.toml` and `tauri.conf.json`, then push to the `release` branch
+(`git push origin main:release`); the `v` tag is created automatically. GitHub Actions builds the installer and publishes it to
 Releases together with `latest.json` for the in-app updater. The repository needs an Actions secret
 named `TAURI_SIGNING_PRIVATE_KEY` holding the update signing key; the matching public key is in
 `tauri.conf.json`.

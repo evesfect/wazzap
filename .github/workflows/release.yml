@@ -1,10 +1,11 @@
-# v ile başlayan bir etiket (ör. v0.3.0) gönderilince Windows kurulumunu derleyip
-# GitHub Releases'a yükler. Uygulama içi güncelleme latest.json dosyasını buradan okur.
+# release dalına gönderilince Windows kurulumunu derleyip GitHub Releases'a yükler.
+# Etiket (v + Cargo.toml / tauri.conf.json sürümü) otomatik oluşturulur.
+# Uygulama içi güncelleme latest.json dosyasını buradan okur.
 name: Release
 
 on:
   push:
-    tags: ['v*']
+    branches: [release]
   workflow_dispatch:
 
 permissions:
@@ -39,8 +40,8 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ''
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: Wazzap ${{ github.ref_name }}
+          tagName: v__VERSION__
+          releaseName: Wazzap v__VERSION__
           releaseBody: |
             Download `Wazzap_*_x64-setup.exe` below and run it. Installed copies update themselves.
             Aşağıdaki `Wazzap_*_x64-setup.exe` dosyasını indirip çalıştır. Kurulu sürümler kendini günceller.
