@@ -485,6 +485,19 @@ with sync_playwright() as p:
     page.wait_for_timeout(400)
     page.screenshot(path=str(SHOTS / "13-discord.png"))
 
+    # --- dış bağlantılar
+    page.evaluate("""() => { const m = document.querySelector('#main .msgs') || document.body;
+      const a = document.createElement('a'); a.href = 'https://example.com/x?y=1'; a.target = '_blank'; a.id = 'ext'; a.textContent = 'link';
+      a.style.cssText = 'position:fixed;left:600px;top:300px;z-index:1;display:block;padding:10px;background:#fff';
+      document.body.appendChild(a); }""")
+    before = len(page.evaluate("window.__calls"))
+    page.click("#ext")
+    w = page.evaluate("(() => { const w = window.open('', '_blank'); w.location = 'https://example.org/'; const w2 = window.open('http://example.net/', '_blank', 'noopener'); return [!!w, !!w2]; })()")
+    page.wait_for_timeout(200)
+    opened = [c[1]["data"] for c in page.evaluate("window.__calls")[before:] if c[0] == "wa_event" and c[1]["kind"] == "open"]
+    check("linkler tarayıcıda açılıyor (tık, boş pencere, window.open)", opened == ["https://example.com/x?y=1", "https://example.org/", "http://example.net/"] and w == [True, True], str(opened))
+    check("link sayfayı değiştirmedi", page.evaluate("location.protocol") != "https:" or "example" not in page.evaluate("location.href"))
+
     check("tanılamadan sonra tema yerinde", page.evaluate("document.adoptedStyleSheets.length") >= 4)
     check("sayfa hatası yok", not errors, " | ".join(errors[:5]))
     browser.close()

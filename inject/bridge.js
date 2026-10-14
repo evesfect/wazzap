@@ -24,6 +24,45 @@
   const send = (kind, data) =>
     invoke('wa_event', { kind, data: data === undefined ? null : data }).catch(() => {});
 
+  /* ------------------------------------------------------- dış bağlantılar */
+  // Mesajlardaki linkler varsayılan tarayıcıda açılsın. WhatsApp bazen boş bir pencere açıp
+  // adresini sonradan veriyor; pencere isteği uygulamada yakalanamadığı için burada çözülür.
+  const isExternal = (u) => !!u && /^(https?|mailto|tel):$/.test(u.protocol)
+    && !(u.protocol === 'https:' && u.host === 'web.whatsapp.com');
+  const toUrl = (v) => { try { return new URL(String(v), location.href); } catch (e) { return null; } };
+  function openExternal(v) {
+    const u = toUrl(v);
+    if (isExternal(u)) { send('open', u.href); return true; }
+    return false;
+  }
+  document.addEventListener('click', (e) => {
+    if (e.defaultPrevented || (e.button !== 0 && e.button !== 1)) return;
+    const a = e.target && e.target.closest && e.target.closest('a[href]');
+    if (!a || a.closest('.wap-panel, .wap-media, .wap-menu')) return;
+    if (!isExternal(toUrl(a.getAttribute('href')))) return;
+    e.preventDefault();
+    e.stopPropagation();
+    openExternal(a.href);
+  }, true);
+  document.addEventListener('auxclick', (e) => {
+    const a = e.button === 1 && e.target && e.target.closest && e.target.closest('a[href]');
+    if (a && isExternal(toUrl(a.getAttribute('href')))) { e.preventDefault(); e.stopPropagation(); openExternal(a.href); }
+  }, true);
+  const nativeOpen = window.open;
+  window.open = function (url, target, features) {
+    const u = url === undefined || url === null || url === '' ? null : toUrl(url);
+    if (u && !isExternal(u)) return nativeOpen.call(window, url, target, features);
+    if (u) { send('open', u.href); }
+    // Boş pencere: adres sonradan verilince tarayıcıda aç.
+    let done = !!u;
+    const go = (v) => { if (!done && openExternal(v)) done = true; };
+    const loc = { assign: go, replace: go, toString: () => 'about:blank' };
+    Object.defineProperty(loc, 'href', { get: () => 'about:blank', set: go });
+    const stub = { closed: false, opener: null, close() { this.closed = true; }, focus() {}, blur() {}, postMessage() {} };
+    Object.defineProperty(stub, 'location', { get: () => loc, set: go });
+    return stub;
+  };
+
   /* ------------------------------------------------------- bildirim köprüsü */
   // WhatsApp Web bildirimleri tarayıcı Notification API'siyle gösterir. Burada onu
   // Windows bildirimine yönlendiriyoruz; izin her zaman "verildi" görünür.

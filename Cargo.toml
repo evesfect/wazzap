@@ -1,6 +1,6 @@
 [package]
 name = "wazzap"
-version = "0.3.3"
+version = "0.3.4"
 description = "Lightweight Windows desktop client for WhatsApp Web"
 license = "MIT"
 edition = "2024"

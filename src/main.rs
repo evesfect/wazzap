@@ -582,6 +582,14 @@ fn wa_event(app: AppHandle, kind: String, data: serde_json::Value) -> Result<(),
             notify(&app, title, &body, Click::Chat(title.to_string()));
         }
         "scheduled-result" => schedule_result(&app, &data),
+        "open" => {
+            // Sayfadaki dış bağlantılar (mesajdaki linkler, window.open) varsayılan tarayıcıda açılır.
+            if let Some(url) = data.as_str().and_then(|u| u.parse::<Url>().ok()) {
+                if !is_internal(&url) {
+                    open_external(&url);
+                }
+            }
+        }
         "diag" => {
             let name: String = data
                 .get("name")
@@ -1281,6 +1289,9 @@ fn build_main(app: &AppHandle, s: &Settings) -> tauri::Result<WebviewWindow> {
                 false
             }
         })
+        // Tauri dosya sürükle-bırakmayı varsayılan olarak kendisi yakalıyor; WhatsApp'a
+        // fotoğraf / belge bırakılabilsin diye kapat.
+        .disable_drag_drop_handler()
         .on_new_window(|url, _features| {
             // Dış bağlantılar varsayılan tarayıcıda açılır.
             if url.scheme() == "blob" {
