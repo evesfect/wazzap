@@ -48,6 +48,8 @@ struct AppState {
     updating: AtomicBool,
     /// Mini pencereden çıkınca dönülecek mod.
     mini_return: Mutex<String>,
+    /// Medya toplayıcının indirdiği dosyalar (bunlar indirince açılmaz).
+    collected: Mutex<Vec<PathBuf>>,
     /// GitHub'da bulunan, kurulmayı bekleyen sürüm.
     github_update: Mutex<Option<tauri_plugin_updater::Update>>,
     github_checking: AtomicBool,
@@ -1262,6 +1264,27 @@ fn is_internal(url: &Url) -> bool {
     }
 }
 
+/// İndirilen belgeyi açar. Yalnızca bilinen, kendiliğinden kod çalıştırmayan türler varsayılan
+/// uygulamayla açılır; diğerleri (exe, betik, kısayol…) yalnızca klasörde seçili gösterilir.
+fn open_downloaded(app: &AppHandle, path: &std::path::Path) {
+    const SAFE: &[&str] = &[
+        "png", "jpg", "jpeg", "gif", "webp", "bmp", "heic", "heif", "tif", "tiff", "avif",
+        "pdf", "txt", "csv", "rtf", "md",
+        "mp4", "mov", "m4v", "avi", "mkv", "webm", "3gp",
+        "mp3", "m4a", "aac", "ogg", "opus", "wav", "flac",
+        "doc", "docx", "xls", "xlsx", "ppt", "pptx", "odt", "ods", "odp", "pages", "key", "numbers",
+        "psd", "ai", "zip", "rar", "7z",
+    ];
+    let ext = path.extension().map(|e| e.to_string_lossy().to_lowercase()).unwrap_or_default();
+    if SAFE.contains(&ext.as_str()) {
+        log(app, &format!("indirilen açılıyor: .{ext}"));
+        let _ = tauri_plugin_opener::open_path(path, None::<&str>);
+    } else {
+        log(app, &format!("indirilen klasörde gösteriliyor: .{ext}"));
+        let _ = tauri_plugin_opener::reveal_item_in_dir(path);
+    }
+}
+
 fn open_external(url: &Url) {
     if matches!(url.scheme(), "http" | "https" | "mailto" | "tel") {
         let _ = tauri_plugin_opener::open_url(url.as_str(), None::<&str>);
@@ -1311,6 +1334,7 @@ fn build_main(app: &AppHandle, s: &Settings) -> tauri::Result<WebviewWindow> {
                             .map(|n| n.to_string_lossy().to_string())
                             .unwrap_or_else(|| "belge".into());
                         *destination = unique_path(&dir, &safe_name(&name, "belge"));
+                        state(&app).collected.lock().unwrap().push(destination.clone());
                     }
                 }
                 tauri::webview::DownloadEvent::Finished { path, success, .. } => {
@@ -1321,6 +1345,19 @@ fn build_main(app: &AppHandle, s: &Settings) -> tauri::Result<WebviewWindow> {
                         .unwrap_or_default();
                     if let (Some(w), Ok(n)) = (main_window(&app), serde_json::to_string(&name)) {
                         let _ = w.eval(format!("window.__wap && window.__wap.mediaDownloaded({success}, {n});"));
+                    }
+                    // Sohbette tıklanan belge indirildiyse aç (masaüstü WhatsApp gibi).
+                    // Medya toplayıcının kaydettikleri açılmaz.
+                    if let (true, Some(p)) = (success, path.as_ref()) {
+                        let st = state(&app);
+                        let collected = {
+                            let mut list = st.collected.lock().unwrap();
+                            let found = list.iter().position(|x| x == p);
+                            found.map(|i| list.remove(i)).is_some()
+                        };
+                        if !collected {
+                            open_downloaded(&app, p);
+                        }
                     }
                 }
                 _ => {}
@@ -1517,6 +1554,7 @@ fn main() {
                 update_item: Mutex::new(None),
                 updating: AtomicBool::new(false),
                 mini_return: Mutex::new("normal".into()),
+                collected: Mutex::new(Vec::new()),
                 github_update: Mutex::new(None),
                 github_checking: AtomicBool::new(false),
                 maximized: AtomicBool::new(false),
