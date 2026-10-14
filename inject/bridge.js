@@ -663,7 +663,51 @@
       ST.mainEl = main;
       ST.header = key;
       setChat(true);
+      pinToBottom();
     }
+  }
+
+  /* Sohbet açılınca son mesaj en altta görünsün. WhatsApp okunmamış mesajlara ya da
+     yerleşim oturmadan önceki bir konuma kaydırabiliyor (telefon düzeninde panel genişliği
+     açılıştan hemen sonra değişiyor). Kısa bir süre en alta sabitle; kullanıcı kendisi
+     kaydırırsa hemen bırak. */
+  let pinTimer = 0;
+  function chatScroller() {
+    const box = messagesBox();
+    if (box && box.scrollHeight > box.clientHeight) return box;
+    // Yedek: son mesajın kaydırılabilen atası.
+    const rows = document.querySelectorAll('#main [role="row"]');
+    let el = rows.length ? rows[rows.length - 1] : null;
+    while (el && el !== document.body) {
+      const cs = getComputedStyle(el);
+      if (/(auto|scroll)/.test(cs.overflowY) && el.scrollHeight > el.clientHeight) return el;
+      el = el.parentElement;
+    }
+    return box;
+  }
+  function pinToBottom() {
+    clearInterval(pinTimer);
+    const started = Date.now();
+    let stopped = false;
+    let lastBox = null;
+    const stop = () => { stopped = true; };
+    const opts = { passive: true, capture: true };
+    const watch = (box) => {
+      ['wheel', 'touchstart', 'pointerdown', 'keydown'].forEach((t) => box.addEventListener(t, stop, opts));
+    };
+    const unwatch = (box) => {
+      ['wheel', 'touchstart', 'pointerdown', 'keydown'].forEach((t) => box.removeEventListener(t, stop, opts));
+    };
+    pinTimer = setInterval(() => {
+      const box = chatScroller();
+      if (box && box !== lastBox) { if (lastBox) unwatch(lastBox); watch(box); lastBox = box; }
+      if (stopped || Date.now() - started > 2500 || !document.getElementById('main')) {
+        clearInterval(pinTimer);
+        if (lastBox) unwatch(lastBox);
+        return;
+      }
+      if (box) box.scrollTop = box.scrollHeight;
+    }, 60);
   }
 
   function goBack() {
