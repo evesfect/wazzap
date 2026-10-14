@@ -383,7 +383,7 @@ fn open_settings(app: &AppHandle) {
         return;
     }
     let _ = WebviewWindowBuilder::new(app, SETTINGS_WIN, WebviewUrl::App("index.html".into()))
-        .title("Tellal · Ayarlar")
+        .title("Wazzap? · Ayarlar")
         .inner_size(1120.0, 760.0)
         .min_inner_size(720.0, 520.0)
         .background_color(tauri::window::Color(0, 0, 0, 255))
@@ -476,7 +476,7 @@ fn run_action(app: &AppHandle, action: &str) {
             } else if update::project_dir().is_none() {
                 github_check(app, true, true);
             } else if check_update(app, false).is_none() {
-                notify(app, "Tellal güncel", &format!("Sürüm {}", env!("CARGO_PKG_VERSION")), Click::Show);
+                notify(app, "Wazzap? güncel", &format!("Sürüm {}", env!("CARGO_PKG_VERSION")), Click::Show);
             }
         }
         "quit" => {
@@ -518,14 +518,14 @@ fn set_unread(app: &AppHandle, count: u32) {
     if let Some(tray) = app.tray_by_id(TRAY) {
         let _ = tray.set_icon(Some(tray_image(count > 0)));
         let tip = if count > 0 {
-            format!("Tellal · {count} okunmamış")
+            format!("Wazzap? · {count} okunmamış")
         } else {
-            "Tellal".to_string()
+            "Wazzap?".to_string()
         };
         let _ = tray.set_tooltip(Some(tip));
     }
     if let Some(w) = main_window(app) {
-        let title = if count > 0 { format!("({count}) Tellal") } else { "Tellal".into() };
+        let title = if count > 0 { format!("({count}) Wazzap?") } else { "Wazzap?".into() };
         let _ = w.set_title(&title);
     }
 }
@@ -854,7 +854,7 @@ fn safe_name(raw: &str, fallback: &str) -> String {
 
 fn media_dir(app: &AppHandle, chat: &str) -> Result<PathBuf, String> {
     let base = app.path().download_dir().map_err(|e| e.to_string())?;
-    let dir = base.join("Tellal").join(safe_name(chat, "Sohbet"));
+    let dir = base.join("Wazzap").join(safe_name(chat, "Sohbet"));
     std::fs::create_dir_all(&dir).map_err(|e| format!("Klasör açılamadı: {e}"))?;
     Ok(dir)
 }
@@ -928,12 +928,12 @@ async fn theme_export(app: AppHandle, theme: Theme) -> Result<Option<String>, St
         .dialog()
         .file()
         .set_title("Temayı dışa aktar")
-        .add_filter("Tellal teması", &["wptema"])
+        .add_filter("Wazzap? teması", &["wptema"])
         .set_file_name(format!("{}.wptema", file_name.trim()))
         .blocking_save_file();
     let Some(fp) = picked else { return Ok(None) };
     let path = fp.into_path().map_err(|e| e.to_string())?;
-    let doc = serde_json::json!({ "format": "tellal-tema", "version": 1, "theme": theme });
+    let doc = serde_json::json!({ "format": "wazzap-tema", "version": 1, "theme": theme });
     let text = serde_json::to_string_pretty(&doc).map_err(|e| e.to_string())?;
     std::fs::write(&path, text).map_err(|e| format!("Yazılamadı: {e}"))?;
     Ok(Some(path.display().to_string()))
@@ -946,7 +946,7 @@ async fn theme_import(app: AppHandle) -> Result<Option<Theme>, String> {
         .dialog()
         .file()
         .set_title("Tema dosyası seç")
-        .add_filter("Tellal teması", &["wptema", "json"])
+        .add_filter("Wazzap? teması", &["wptema", "json"])
         .blocking_pick_file();
     let Some(fp) = picked else { return Ok(None) };
     let path = fp.into_path().map_err(|e| e.to_string())?;
@@ -956,10 +956,10 @@ async fn theme_import(app: AppHandle) -> Result<Option<Theme>, String> {
 
 fn parse_theme_file(text: &str) -> Result<Theme, String> {
     let v: serde_json::Value = serde_json::from_str(text.trim_start_matches('\u{feff}'))
-        .map_err(|_| "Bu bir Tellal tema dosyası değil".to_string())?;
+        .map_err(|_| "Bu bir Wazzap? tema dosyası değil".to_string())?;
     let inner = v.get("theme").cloned().unwrap_or(v);
     if !inner.is_object() || inner.get("bg").is_none() {
-        return Err("Bu bir Tellal tema dosyası değil".into());
+        return Err("Bu bir Wazzap? tema dosyası değil".into());
     }
     let theme: Theme = serde_json::from_value(inner).map_err(|_| "Tema dosyası bozuk".to_string())?;
     Ok(theme.sanitized())
@@ -1017,7 +1017,7 @@ fn check_update(app: &AppHandle, notify_user: bool) -> Option<String> {
             *notified = Some(v.clone());
             drop(notified);
             log(app, &format!("güncelleme hazır: {v}"));
-            notify(app, &format!("Tellal v{v} hazır"), "Kurmak için tıkla. Birkaç dakika sürer, sonra uygulama yeniden açılır.", Click::Settings);
+            notify(app, &format!("Wazzap? v{v} hazır"), "Kurmak için tıkla. Birkaç dakika sürer, sonra uygulama yeniden açılır.", Click::Settings);
         }
     }
     found
@@ -1050,7 +1050,7 @@ fn github_check(app: &AppHandle, notify_user: bool, announce_none: bool) {
                     *notified = Some(v.clone());
                     drop(notified);
                     log(&app, &format!("güncelleme hazır (GitHub): {v}"));
-                    notify(&app, &format!("Tellal v{v} hazır"), "Kurmak için tıkla. İndirilir, sonra uygulama yeniden açılır.", Click::Settings);
+                    notify(&app, &format!("Wazzap? v{v} hazır"), "Kurmak için tıkla. İndirilir, sonra uygulama yeniden açılır.", Click::Settings);
                 }
             }
             Ok(None) => {
@@ -1058,7 +1058,7 @@ fn github_check(app: &AppHandle, notify_user: bool, announce_none: bool) {
                 *st.github_update.lock().unwrap() = None;
                 refresh_update_ui(&app);
                 if announce_none {
-                    notify(&app, "Tellal güncel", &format!("Sürüm {}", env!("CARGO_PKG_VERSION")), Click::Show);
+                    notify(&app, "Wazzap? güncel", &format!("Sürüm {}", env!("CARGO_PKG_VERSION")), Click::Show);
                 }
             }
             Err(e) => {
@@ -1081,7 +1081,7 @@ fn start_github_update(app: &AppHandle) -> Result<(), String> {
     log(app, &format!("GitHub güncellemesi indiriliyor: {}", update.version));
     refresh_update_ui(app);
     if let Some(tray) = app.tray_by_id(TRAY) {
-        let _ = tray.set_tooltip(Some("Tellal · güncelleniyor"));
+        let _ = tray.set_tooltip(Some("Wazzap? · güncelleniyor"));
     }
     let app = app.clone();
     tauri::async_runtime::spawn(async move {
@@ -1116,7 +1116,7 @@ fn start_update(app: &AppHandle) -> Result<(), String> {
     log(app, "güncelleme başlatıldı");
     refresh_update_ui(app);
     if let Some(tray) = app.tray_by_id(TRAY) {
-        let _ = tray.set_tooltip(Some("Tellal · güncelleniyor"));
+        let _ = tray.set_tooltip(Some("Wazzap? · güncelleniyor"));
     }
     match spawn_update(&dir, &log_path) {
         Ok(mut child) => {
@@ -1263,7 +1263,7 @@ fn open_external(url: &Url) {
 fn build_main(app: &AppHandle, s: &Settings) -> tauri::Result<WebviewWindow> {
     let url: Url = WA_URL.parse().expect("geçerli adres");
     let w = WebviewWindowBuilder::new(app, MAIN, WebviewUrl::External(url))
-        .title("Tellal")
+        .title("Wazzap?")
         .decorations(false)
         .inner_size(1100.0, 760.0)
         .min_inner_size(320.0, 460.0)
@@ -1358,7 +1358,7 @@ fn build_tray(app: &AppHandle) -> tauri::Result<TrayIcon> {
 
     TrayIconBuilder::with_id(TRAY)
         .icon(tray_image(false))
-        .tooltip("Tellal")
+        .tooltip("Wazzap?")
         .menu(&menu)
         .show_menu_on_left_click(false)
         .on_menu_event(|app, event| {
@@ -1390,7 +1390,7 @@ fn register_toast_identity(app: &AppHandle, data_dir: &std::path::Path) {
     let _ = std::fs::write(&icon, include_bytes!("../icons/128x128.png"));
     let key = format!("HKCU\\Software\\Classes\\AppUserModelId\\{id}");
     let values = [
-        ("DisplayName", "Tellal".to_string()),
+        ("DisplayName", "Wazzap?".to_string()),
         ("IconUri", icon.display().to_string()),
     ];
     for (name, value) in values {
@@ -1401,17 +1401,16 @@ fn register_toast_identity(app: &AppHandle, data_dir: &std::path::Path) {
     }
 }
 
-/// Uygulamanın eski kimliği (WhatsApp+ adıyla kullanılan veri klasörü).
-const OLD_IDENTIFIER: &str = "com.kvbilai.whatsappplus";
+/// Uygulamanın eski kimlikleri (WhatsApp+ ve Tellal adlarıyla kullanılan veri klasörleri), yeniden eskiye.
+const OLD_IDENTIFIERS: [&str; 2] = ["com.kvbilai.tellal", "com.kvbilai.whatsappplus"];
 
 /// Yeni veri klasörü yoksa eskisini adını değiştirerek taşır; taşınamazsa (dosya kilitli)
 /// ayarlar ve zamanlı mesaj dosyalarını kopyalar.
 fn migrate_old_dir(new_dir: &std::path::Path) {
     let Some(parent) = new_dir.parent() else { return };
-    let old = parent.join(OLD_IDENTIFIER);
-    if !old.is_dir() {
+    let Some(old) = OLD_IDENTIFIERS.iter().map(|id| parent.join(id)).find(|p| p.is_dir()) else {
         return;
-    }
+    };
     let fresh = !new_dir.exists()
         || std::fs::read_dir(new_dir).map(|mut d| d.next().is_none()).unwrap_or(false);
     if !fresh {
@@ -1477,7 +1476,7 @@ fn main() {
             let handle = app.handle().clone();
             let config_dir = app.path().app_config_dir()?;
             let data_dir = app.path().app_data_dir()?;
-            // WhatsApp+ adından taşınma: ayarlar, zamanlı mesajlar ve WhatsApp oturumu kalsın.
+            // Eski addan (WhatsApp+ / Tellal) taşınma: ayarlar, zamanlı mesajlar ve WhatsApp oturumu kalsın.
             if let Ok(local) = app.path().app_local_data_dir() {
                 migrate_old_dir(&local);
             }
@@ -1589,7 +1588,7 @@ fn main() {
             }
         })
         .build(tauri::generate_context!())
-        .expect("Tellal başlatılamadı")
+        .expect("Wazzap? başlatılamadı")
         .run(|app, event| {
             if let RunEvent::Exit = event {
                 state(app).save();
@@ -1620,7 +1619,7 @@ mod tests {
     #[test]
     fn theme_file() {
         let t = Theme::default();
-        let doc = serde_json::json!({ "format": "tellal-tema", "version": 1, "theme": t });
+        let doc = serde_json::json!({ "format": "wazzap-tema", "version": 1, "theme": t });
         assert_eq!(parse_theme_file(&doc.to_string()).unwrap().bg, "#000000");
         let bare = serde_json::to_string(&Theme::default()).unwrap();
         assert!(parse_theme_file(&bare).is_ok());

@@ -434,7 +434,7 @@ with sync_playwright() as p:
     check("mini kapanınca mini sınıfı kalktı", page.evaluate("!document.documentElement.classList.contains('wap-mini')"))
 
     # --- başlık çubuğu her modda
-    check("normal: başlık çubuğu var, başlık Tellal", page.evaluate("(document.querySelector('.wap-minibar-title') || {}).textContent") == "Tellal")
+    check("normal: başlık çubuğu var, başlık Wazzap?", page.evaluate("(document.querySelector('.wap-minibar-title') || {}).textContent") == "Wazzap?")
     check("normal: içerik çubuğun altında", page.evaluate("Math.round(document.getElementById('app').getBoundingClientRect().top)") == 30)
     check("normal: tam ekran düğmesi görünür", page.evaluate("!document.querySelector('.wap-bar-max').hidden"))
     bar = page.evaluate("(() => { const r = document.querySelector('.wap-minibar').getBoundingClientRect(); const c = document.querySelector('.wap-cap-close').getBoundingClientRect(); return [r.top, r.height, Math.round(c.right)]; })()")

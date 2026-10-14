@@ -1,26 +1,24 @@
-# Tellal
+# Wazzap?
 
 **English** · [Türkçe](README.tr.md)
 
-A lightweight Windows desktop client for WhatsApp Web. Tellal opens the official WhatsApp Web in its
+A lightweight Windows desktop client for WhatsApp Web. Wazzap? opens the official WhatsApp Web in its
 own window and adds themes, a phone-sized and a mini window, scheduled messages and a media
 collector on top. It does not touch messaging itself: the session, encryption and connection are
 WhatsApp Web's own. Built with Tauri and the system WebView2 instead of Electron, so the installer
 is a few MB.
 
-*Tellal* is Turkish for a town crier, the person who carried the news through the streets.
+![Wazzap? with the Navy theme (on the project's test page)](docs/screenshot.png)
 
-![Tellal with the Navy theme (on the project's test page)](docs/screenshot.png)
-
-> **Disclaimer:** Tellal is an independent project. It is not affiliated with, endorsed by or
+> **Disclaimer:** Wazzap? is an independent project. It is not affiliated with, endorsed by or
 > sponsored by WhatsApp LLC or Meta Platforms. "WhatsApp" is a trademark of Meta. Scheduled
 > messages are sent by driving the WhatsApp Web interface on your behalf, and WhatsApp's terms
-> restrict automated messaging. Tellal is meant for personal, occasional use; do not use it for
+> restrict automated messaging. Wazzap? is meant for personal, occasional use; do not use it for
 > bulk messaging. Use at your own risk.
 
 ## Install
 
-Download `Tellal_*_x64-setup.exe` from [Releases](../../releases/latest) and run it. Scan the QR
+Download `Wazzap_*_x64-setup.exe` from [Releases](../../releases/latest) and run it. Scan the QR
 code with your phone once; the session is kept. The app checks for new versions itself and installs
 them in one click.
 
@@ -33,7 +31,7 @@ The interface is in Turkish.
 
 Double-click `derle.bat`. On first run it installs **Rust** and the **Visual Studio C++ build
 tools** with winget if they are missing (one time, a few GB, asks for admin rights), builds the app,
-installs it to `%LOCALAPPDATA%\Programs\Tellal` and adds shortcuts. A copy installed this way takes
+installs it to `%LOCALAPPDATA%\Programs\Wazzap` and adds shortcuts. A copy installed this way takes
 updates from the project folder instead of GitHub, which is handy for development.
 
 ## Features
@@ -49,10 +47,10 @@ updates from the project folder instead of GitHub, which is handy for developmen
   Drag to move, double-click to maximise, Windows Snap and edge resizing work.
 - **Scheduled messages** (clock button or Ctrl+Shift+Enter): shown as a faded outgoing bubble in the
   chat and in a "Scheduled" section above the chat list; send now, edit or cancel from there.
-  Tellal must be running (the tray is enough) and the computer awake. Messages more than 10 minutes
+  Wazzap? must be running (the tray is enough) and the computer awake. Messages more than 10 minutes
   late are not sent automatically.
 - **Media collector** (Ctrl+Shift+M): images, videos and documents of the open chat in tabs; save
-  selected or all to `Downloads\Tellal\<chat>` at full resolution.
+  selected or all to `Downloads\Wazzap\<chat>` at full resolution.
 - **Desktop integration:** taskbar unread badge, clickable notifications that open the chat, tray,
   global show / hide shortcut (Ctrl+Shift+Space), start with Windows, zoom.
 
@@ -70,14 +68,14 @@ updates from the project folder instead of GitHub, which is handy for developmen
 | Ctrl + Shift + M | Media collector |
 | Ctrl + Shift + I | Developer tools |
 
-Closing the window keeps Tellal running in the tray; quit from the tray menu.
+Closing the window keeps Wazzap? running in the tray; quit from the tray menu.
 
 ## Privacy
 
-Tellal adds no servers, analytics or accounts. Everything it stores stays on your computer in
-`%APPDATA%\com.kvbilai.tellal`: settings (`ayarlar.json`), scheduled messages (`zamanli.json`) and,
+Wazzap? adds no servers, analytics or accounts. Everything it stores stays on your computer in
+`%APPDATA%\com.kvbilai.wazzap`: settings (`ayarlar.json`), scheduled messages (`zamanli.json`) and,
 only when you ask for one, diagnostic files (`tanilama/`) that contain colour variables and page
-structure but no messages, names or numbers. The only network request Tellal itself makes is the
+structure but no messages, names or numbers. The only network request Wazzap? itself makes is the
 update check against this repository's GitHub Releases.
 
 ## Development

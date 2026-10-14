@@ -1,4 +1,4 @@
-# Tellal
+# Wazzap?
 
 [English](README.md) · **Türkçe**
 
@@ -7,9 +7,9 @@ açar; üstüne tema, telefon boyutu ve mini pencere, zamanlı mesajlar ve medya
 Mesajlaşmaya dokunmaz: oturum, şifreleme ve bağlantı tamamen WhatsApp Web'in kendisidir.
 Electron değil, Tauri + sistemdeki WebView2 kullanır; kurulum birkaç MB'tır.
 
-![Tellal, Lacivert temasıyla (projenin test sayfasında)](docs/screenshot.png)
+![Wazzap?, Lacivert temasıyla (projenin test sayfasında)](docs/screenshot.png)
 
-> **Not:** Tellal bağımsız bir projedir; WhatsApp LLC veya Meta Platforms ile bağlantılı değildir,
+> **Not:** Wazzap? bağımsız bir projedir; WhatsApp LLC veya Meta Platforms ile bağlantılı değildir,
 > onlar tarafından onaylanmamıştır. "WhatsApp" Meta'nın tescilli markasıdır. Zamanlı mesajlar
 > WhatsApp Web arayüzünü senin yerine kullanarak gönderilir; WhatsApp otomatik mesajlaşmayı
 > kurallarında kısıtlar. Kişisel, ara sıra kullanım için tasarlandı; toplu mesaj için kullanma.
@@ -17,7 +17,7 @@ Electron değil, Tauri + sistemdeki WebView2 kullanır; kurulum birkaç MB'tır.
 
 ## Kurulum
 
-[Releases](../../releases/latest) sayfasından `Tellal_*_x64-setup.exe` dosyasını indirip çalıştır.
+[Releases](../../releases/latest) sayfasından `Wazzap_*_x64-setup.exe` dosyasını indirip çalıştır.
 Açılınca QR kodu telefonundan bir kere okut, oturum kalıcıdır. Uygulama yeni sürümleri kendisi
 denetler ve tek tıkla kurar.
 
@@ -28,7 +28,7 @@ uyarısı gösterebilir: **Ek bilgi → Yine de çalıştır**.
 
 `derle.bat` dosyasına çift tıkla. Betik ilk seferde eksikse **Rust** ve **Visual Studio C++
 derleme araçlarını** winget ile kurar (bir kerelik, birkaç GB, yönetici izni ister), uygulamayı
-derler, `%LOCALAPPDATA%\Programs\Tellal` altına koyar ve kısayol ekler. Bu yolla kurulan kopya
+derler, `%LOCALAPPDATA%\Programs\Wazzap` altına koyar ve kısayol ekler. Bu yolla kurulan kopya
 güncellemeleri GitHub'dan değil, proje klasöründen alır (geliştirme için).
 
 ## Kısayollar
@@ -67,7 +67,7 @@ En temiz sonuç için WhatsApp'ın kendi ayarlarından Koyu temayı seç.
 ## Zamanlı mesajlar
 
 Bir sohbette sol alttaki saat düğmesine ya da Ctrl + Shift + Enter'a bas, metni ve zamanı seç.
-Zamanı gelince Tellal sohbeti açar, mesajı yazar ve gönderir, sonra baktığın sohbete geri döner.
+Zamanı gelince Wazzap? sohbeti açar, mesajı yazar ve gönderir, sonra baktığın sohbete geri döner.
 Zamanlanmış mesajlar sohbetin en altında, saat simgeli soluk bir giden mesaj olarak görünür;
 üstüne tıklayınca şimdi gönder / düzenle / iptal menüsü açılır. Sohbet listesinin en üstünde
 "Zamanlanmış" bölümü vardır (WhatsApp'ın kendi sıralaması değişmez), listede de zamanlanmış
@@ -75,10 +75,10 @@ mesajı olan sohbetin adının yanında saat simgesi görünür. Hepsi ayrıca A
 mesajlar'da listelenir.
 
 WhatsApp'ın içine eklenen her şey (saat düğmesi, zamanlama penceresi, menü, önizleme baloncukları)
-WhatsApp'ın kendi renk değişkenleriyle çizilir: tema neyse onlar da ona uyar. Tellal'ın kendi
+WhatsApp'ın kendi renk değişkenleriyle çizilir: tema neyse onlar da ona uyar. Wazzap?'ın kendi
 görünümü yalnızca ayarlar penceresindedir.
 
-- Mesajın gitmesi için Tellal açık (tepside de olur) ve bilgisayar uyanık olmalı.
+- Mesajın gitmesi için Wazzap? açık (tepside de olur) ve bilgisayar uyanık olmalı.
 - 10 dakikadan fazla geciken mesaj gönderilmez, "kaçırıldı" olarak bekler; istersen elle gönderirsin.
 - Aynı anda tek mesaj gider, iki gönderim arasında en az 20 saniye olur.
 - Hedef sohbette yarım kalmış bir taslak varsa mesaj gönderilmez, haber verilir.
@@ -103,13 +103,13 @@ kalabildiği için ana pencere küçülür.
 
 Bir sohbetteyken sol alttaki görsel düğmesine ya da Ctrl + Shift + M'ye bas. Sohbette yüklü
 görseller, videolar ve belgeler sekmelere ayrılır; tek tek seçip ya da "Tümünü kaydet" ile
-`İndirilenler\Tellal\<sohbet adı>` klasörüne kaydedersin. Görsel ve videolar görüntüleyiciden
+`İndirilenler\Wazzap\<sohbet adı>` klasörüne kaydedersin. Görsel ve videolar görüntüleyiciden
 tam çözünürlükte alınır. Yalnızca ekrana yüklenmiş mesajlar görünür; "Daha eskileri yükle"
 sohbeti yukarı kaydırıp eski medyayı da getirir.
 
 ## Bildirimler
 
-Bildirime tıklayınca Tellal öne gelir ve o sohbet açılır.
+Bildirime tıklayınca Wazzap? öne gelir ve o sohbet açılır.
 
 ## Güncelleme
 
@@ -144,7 +144,7 @@ anahtarı; açık anahtarı `tauri.conf.json` içinde).
 | `tests/` | Sahte WhatsApp sayfası üzerinde köprü testi (Playwright): `python3 tests/bridge_test.py . /tmp/shots`; Chromium yolu `CHROMIUM` ortam değişkeniyle verilebilir. Önce `WAP_DUMP=tests/.init.js cargo test dump` |
 | `.github/workflows/` | CI (cargo test) ve sürüm yayınlama |
 
-Ayarlar `%APPDATA%\com.kvbilai.tellal\ayarlar.json`, zamanlı mesajlar aynı klasörde
+Ayarlar `%APPDATA%\com.kvbilai.wazzap\ayarlar.json`, zamanlı mesajlar aynı klasörde
 `zamanli.json` dosyasında durur.
 
 ## Lisans

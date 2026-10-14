@@ -40,10 +40,10 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ''
         with:
           tagName: ${{ github.ref_name }}
-          releaseName: Tellal ${{ github.ref_name }}
+          releaseName: Wazzap ${{ github.ref_name }}
           releaseBody: |
-            Download `Tellal_*_x64-setup.exe` below and run it. Installed copies update themselves.
-            Aşağıdaki `Tellal_*_x64-setup.exe` dosyasını indirip çalıştır. Kurulu sürümler kendini günceller.
+            Download `Wazzap_*_x64-setup.exe` below and run it. Installed copies update themselves.
+            Aşağıdaki `Wazzap_*_x64-setup.exe` dosyasını indirip çalıştır. Kurulu sürümler kendini günceller.
           releaseDraft: false
           prerelease: false
           includeUpdaterJson: true

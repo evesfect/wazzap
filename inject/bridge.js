@@ -1,5 +1,5 @@
 /*
- * Tellal köprüsü
+ * Wazzap? köprüsü
  * WhatsApp Web'in üstüne giydirilen katman: tema, telefon modu, kısayollar,
  * bildirim köprüsü. Mesajlaşmaya, ağ trafiğine ve sayfanın kendi koduna dokunmaz.
  * Bu dosya Rust tarafında window.__WAP_BOOT__ ile birlikte sayfaya eklenir.
@@ -400,7 +400,7 @@
     try {
       safeReplace(sheets.theme, buildThemeCss());
     } catch (e) {
-      console.warn('[Tellal] tema kurulamadı', e);
+      console.warn('[Wazzap] tema kurulamadı', e);
     }
   }
 
@@ -563,7 +563,7 @@
     if (!miniBar || !miniBar.isConnected) {
       miniBar = mk('div', 'wap-minibar');
       miniBar.setAttribute('role', 'toolbar');
-      const title = mk('span', 'wap-minibar-title', 'Tellal');
+      const title = mk('span', 'wap-minibar-title', 'Wazzap?');
       const sep = mk('span', 'wap-minibar-sep');
       miniBar.append(
         title,
@@ -613,7 +613,7 @@
     }
     const t = miniBar.querySelector('.wap-minibar-title');
     const chat = mini ? currentChatTitle() : '';
-    const name = chat || 'Tellal';
+    const name = chat || 'Wazzap?';
     if (t.textContent !== name) t.textContent = name;
   }
   function setWin(next) {
@@ -1640,7 +1640,7 @@
 
   /* --------------------------------------------------------- medya toplayıcı */
   // Sohbette yüklenmiş mesajlardaki görsel, video ve belgeleri toplar; seçilenleri
-  // İndirilenler/Tellal/<sohbet> klasörüne kaydeder. Tam çözünürlük için her öğe
+  // İndirilenler/Wazzap/<sohbet> klasörüne kaydeder. Tam çözünürlük için her öğe
   // WhatsApp'ın kendi görüntüleyicisinde açılıp oradan alınır.
 
   let mediaFab = null;
@@ -1943,7 +1943,7 @@
     invoke('wa_media', { action: 'target', data: { chat: '' } }).catch(() => {});
     renderMedia();
     setMediaStatus(MEDIA.cancel ? `Durduruldu · ${ok} kaydedildi` : bad ? `${ok} kaydedildi, ${bad} kaydedilemedi` : `${ok} öğe kaydedildi`);
-    if (ok) toast(`${ok} öğe İndirilenler/Tellal klasörüne kaydedildi`);
+    if (ok) toast(`${ok} öğe İndirilenler/Wazzap klasörüne kaydedildi`);
   }
 
   /* ------------------------------------------------------------- girişler */
@@ -2116,7 +2116,7 @@
     const side = document.getElementById('side');
     const budget = { n: 1500 };
     const info = {
-      app: 'Tellal', version: BOOT.version, name: name || 'elle',
+      app: 'Wazzap?', version: BOOT.version, name: name || 'elle',
       time: new Date().toISOString(),
       userAgent: navigator.userAgent,
       viewport: [innerWidth, innerHeight], dpr: devicePixelRatio, zoom: zoomFactor(), logicalWidth: Math.round(logicalWidth()),

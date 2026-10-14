@@ -1,6 +1,6 @@
-﻿# Tellal derleme ve kurulum betiği (geliştirme kurulumu; hazır kurulum için GitHub Releases)
+﻿# Wazzap derleme ve kurulum betiği (geliştirme kurulumu; hazır kurulum için GitHub Releases)
 # İlk çalıştırmada gerekiyorsa Rust ve Visual Studio C++ derleme araçlarını kurar,
-# uygulamayı derler, %LOCALAPPDATA%\Programs\Tellal altına koyar ve Başlat menüsüne ekler.
+# uygulamayı derler, %LOCALAPPDATA%\Programs\Wazzap altına koyar ve Başlat menüsüne ekler.
 #
 # -Sessiz: uygulamanın içinden güncelleme için. Araç kurmaz, pencere açmaz, çıktıyı -Log dosyasına
 #          yazar. Önce derler; derleme başarılıysa çalışan uygulamayı kapatıp yenisini kurar ve açar.
@@ -26,7 +26,7 @@ function Fail($text, $code) {
   exit $code
 }
 
-Say "Tellal derleniyor ($(Get-Date -Format 'yyyy-MM-dd HH:mm'))"
+Say "Wazzap derleniyor ($(Get-Date -Format 'yyyy-MM-dd HH:mm'))"
 
 # 1) Rust
 $cargoBin = Join-Path $env:USERPROFILE '.cargo\bin'
@@ -70,17 +70,17 @@ if ($LASTEXITCODE -ne 0) { Fail 'Derleme başarısız. Yukarıdaki hatayı Claud
 
 # 4) Kurulum
 Step 'Kuruluyor'
-$dir = Join-Path $env:LOCALAPPDATA 'Programs\Tellal'
+$dir = Join-Path $env:LOCALAPPDATA 'Programs\Wazzap'
 New-Item -ItemType Directory -Force -Path $dir | Out-Null
-$exe = Join-Path $dir 'Tellal.exe'
-# Eski adla (WhatsApp+) kurulmuş sürüm de kapansın; veri klasörünü yeni sürüm taşıyacak.
-$oldDir = Join-Path $env:LOCALAPPDATA 'Programs\WhatsApp+'
-$oldExe = Join-Path $oldDir 'WhatsApp+.exe'
-Get-Process | Where-Object { $_.Path -eq $exe -or $_.Path -eq $oldExe } | Stop-Process -Force -ErrorAction SilentlyContinue
+$exe = Join-Path $dir 'Wazzap.exe'
+# Eski adlarla (WhatsApp+, Tellal) kurulmuş sürümler de kapansın; veri klasörünü yeni sürüm taşıyacak.
+$oldNames = @('WhatsApp+', 'Tellal')
+$oldExes = $oldNames | ForEach-Object { Join-Path $env:LOCALAPPDATA "Programs\$_\$_.exe" }
+Get-Process | Where-Object { $_.Path -eq $exe -or $oldExes -contains $_.Path } | Stop-Process -Force -ErrorAction SilentlyContinue
 Start-Sleep -Milliseconds 1500
 $copied = $false
 for ($i = 0; $i -lt 10 -and -not $copied; $i++) {
-  try { Copy-Item 'target\release\tellal.exe' $exe -Force; $copied = $true }
+  try { Copy-Item 'target\release\wazzap.exe' $exe -Force; $copied = $true }
   catch { Start-Sleep -Milliseconds 500 }
 }
 if (-not $copied) { Fail 'Uygulama dosyası değiştirilemedi (hâlâ açık olabilir).' 1 }
@@ -89,19 +89,22 @@ if (-not $copied) { Fail 'Uygulama dosyası değiştirilemedi (hâlâ açık ola
 Set-Content -Path (Join-Path $dir 'kaynak.txt') -Value $PSScriptRoot -Encoding UTF8
 
 # Eski adın izlerini temizle: kurulum klasörü, kısayollar, başlangıç kaydı.
-if (Test-Path $oldDir) { Remove-Item $oldDir -Recurse -Force -ErrorAction SilentlyContinue }
-foreach ($folder in @([Environment]::GetFolderPath('Programs'), [Environment]::GetFolderPath('Desktop'))) {
-  Remove-Item (Join-Path $folder 'WhatsApp+.lnk') -Force -ErrorAction SilentlyContinue
+foreach ($old in $oldNames) {
+  $oldDir = Join-Path $env:LOCALAPPDATA "Programs\$old"
+  if (Test-Path $oldDir) { Remove-Item $oldDir -Recurse -Force -ErrorAction SilentlyContinue }
+  foreach ($folder in @([Environment]::GetFolderPath('Programs'), [Environment]::GetFolderPath('Desktop'))) {
+    Remove-Item (Join-Path $folder "$old.lnk") -Force -ErrorAction SilentlyContinue
+  }
+  Remove-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name $old -ErrorAction SilentlyContinue
 }
-Remove-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name 'WhatsApp+' -ErrorAction SilentlyContinue
 
 $shell = New-Object -ComObject WScript.Shell
 foreach ($folder in @([Environment]::GetFolderPath('Programs'), [Environment]::GetFolderPath('Desktop'))) {
-  $lnk = $shell.CreateShortcut((Join-Path $folder 'Tellal.lnk'))
+  $lnk = $shell.CreateShortcut((Join-Path $folder 'Wazzap.lnk'))
   $lnk.TargetPath = $exe
   $lnk.WorkingDirectory = $dir
   $lnk.IconLocation = "$exe,0"
-  $lnk.Description = 'Tellal'
+  $lnk.Description = 'Wazzap'
   $lnk.Save()
 }
 Note "Uygulama: $exe"

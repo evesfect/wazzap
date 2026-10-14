@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- Tellal ayarları — ev stili üzerine. -->
+<!-- Wazzap? ayarları — ev stili üzerine. -->
 <html lang="tr">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tellal · Ayarlar</title>
+<title>Wazzap? · Ayarlar</title>
 <style>
   @font-face{font-family:Inter; font-style:normal; font-weight:100 900; font-display:swap;
     src:url(fonts/inter-latin-wght-normal.woff2) format('woff2');
@@ -222,7 +222,7 @@
 <div class="shell">
 <div class="rail">
   <div class="masthead">
-    <h1>Tellal</h1>
+    <h1>Wazzap?</h1>
     <p>Temayı seç, renkleri ayarla, düzeni WhatsApp'a uygula.</p>
   </div>
 
@@ -292,7 +292,7 @@
     <summary>Zamanlı mesajlar</summary>
     <div class="body">
       <div id="sched"></div>
-      <p class="note">Bir sohbette sol alttaki saat düğmesine ya da Ctrl + Shift + Enter'a bas. Mesaj zamanında gitsin diye Tellal açık ve bilgisayar uyanık olmalı; 10 dakikadan fazla geciken mesaj gönderilmez, burada bekler.</p>
+      <p class="note">Bir sohbette sol alttaki saat düğmesine ya da Ctrl + Shift + Enter'a bas. Mesaj zamanında gitsin diye Wazzap? açık ve bilgisayar uyanık olmalı; 10 dakikadan fazla geciken mesaj gönderilmez, burada bekler.</p>
     </div>
   </details>
 
@@ -332,7 +332,7 @@
   </details>
 
   <div class="colophon">
-    Tellal · <strong>kvbilai</strong> · MIT lisansı<br>
+    Wazzap? · <strong>kvbilai</strong> · MIT lisansı<br>
     WhatsApp veya Meta ile bağlantılı değildir.<br>
     <span id="ver"></span>
   </div>
@@ -952,6 +952,6 @@ invoke('get_settings')
   .catch(() => { S = JSON.parse(JSON.stringify(DEMO)); syncControls(); setStatus('Önizleme modu'); });
 loadSched();
 if(T) invoke('update_status').then(renderUpd).catch(() => {});
-else renderUpd({ current:'0.2.0', available:null, updating:false, project:'C:\\Users\\…\\Tellal' });
+else renderUpd({ current:'0.2.0', available:null, updating:false, project:'C:\\Users\\…\\Wazzap' });
 invoke('app_info').then(i => { if(i) $('#ver').textContent = `Sürüm ${i.version} · Kısayol ${i.shortcut}`; }).catch(() => {});
 </script>
