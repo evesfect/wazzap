@@ -702,8 +702,10 @@
       ST.mainEl = main;
       ST.header = key;
       setChat(true);
+      STICK.at = true;
       pinToBottom();
     }
+    ensureStick();
   }
 
   /* Sohbet açılınca son mesaj en altta görünsün. WhatsApp okunmamış mesajlara ya da
@@ -724,6 +726,39 @@
     }
     return box;
   }
+  /* Alta yapışma: sohbetin en altındayken yeni mesaj gelirse (pencere odakta olmasa da)
+     en altta kal. WhatsApp pencere odakta değilken yeni mesajları okunmamış sayıp konumu
+     koruyor; bu yüzden bazen mesaj aşağıda, görünüm yukarıda kalıyordu. Kullanıcı yukarı
+     kaydırmışsa dokunulmaz. */
+  const STICK = { box: null, content: null, at: true, mo: null, ro: null };
+  const nearBottom = (b) => b.scrollHeight - b.scrollTop - b.clientHeight < 80;
+  function stickNow() {
+    const b = STICK.box;
+    if (b && b.isConnected && STICK.at) b.scrollTop = b.scrollHeight;
+  }
+  function ensureStick() {
+    const box = document.getElementById('main') ? chatScroller() : null;
+    const content = box ? box.firstElementChild : null;
+    if (box === STICK.box && content === STICK.content) return;
+    if (STICK.mo) STICK.mo.disconnect();
+    if (STICK.ro) STICK.ro.disconnect();
+    STICK.box = box;
+    STICK.content = content;
+    if (!box) return;
+    if (box !== STICK.lastBox) { STICK.at = true; STICK.lastBox = box; }
+    STICK.mo = new MutationObserver(stickNow);
+    STICK.mo.observe(box, { childList: true, subtree: true });
+    if (window.ResizeObserver && content) {
+      // Görseller sonradan yüklenip yüksekliği değiştirdiğinde de altta kal.
+      STICK.ro = new ResizeObserver(stickNow);
+      STICK.ro.observe(content);
+    }
+  }
+  document.addEventListener('scroll', (e) => {
+    if (e.target === STICK.box) STICK.at = nearBottom(STICK.box);
+  }, true);
+  window.addEventListener('focus', () => safe('stick', stickNow));
+
   function pinToBottom() {
     clearInterval(pinTimer);
     const started = Date.now();
