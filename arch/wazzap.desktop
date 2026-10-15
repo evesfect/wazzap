@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Wazzap?
+Comment=WhatsApp Web desktop client
+Exec=wazzap
+Icon=wazzap
+Terminal=false
+Categories=Network;InstantMessaging;
+StartupNotify=true

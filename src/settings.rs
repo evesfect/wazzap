@@ -156,7 +156,7 @@ pub struct Settings {
     pub custom_css: String,
     /// Kullanıcının kaydettiği temalar (ayarlarda çip olarak görünür).
     pub saved_themes: Vec<Theme>,
-    /// Arayüz dili: "auto" (Windows'un diline göre) / "tr" / "en".
+    /// Arayüz dili: "auto" (sistem diline göre) / "tr" / "en".
     pub language: String,
     /// Çözülmüş dil ("tr" / "en"); kaydedilmez, sayfaya ve ayarlar penceresine gider.
     #[serde(skip_deserializing)]
@@ -175,7 +175,8 @@ impl Default for Settings {
             mini_on_top: true,
             phone_snap_right: true,
             always_on_top: false,
-            close_to_tray: true,
+            // Many Linux desktops do not expose a tray without an extension.
+            close_to_tray: !cfg!(target_os = "linux"),
             autostart: false,
             notifications: true,
             notify_preview: true,

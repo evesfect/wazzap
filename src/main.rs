@@ -1040,7 +1040,13 @@ fn update_status_value(app: &AppHandle) -> serde_json::Value {
         "available": *st.update_version.lock().unwrap(),
         "updating": st.updating.load(Ordering::SeqCst),
         "project": update::project_dir().map(|p| p.display().to_string()),
-        "source": if update::project_dir().is_some() { "proje" } else { "github" },
+        "source": if cfg!(target_os = "linux") {
+            "package"
+        } else if update::project_dir().is_some() {
+            "proje"
+        } else {
+            "github"
+        },
     })
 }
 
@@ -1049,7 +1055,9 @@ fn refresh_update_ui(app: &AppHandle) {
     let available = st.update_version.lock().unwrap().clone();
     let updating = st.updating.load(Ordering::SeqCst);
     if let Some(item) = st.update_item.lock().unwrap().as_ref() {
-        let text = if updating {
+        let text = if cfg!(target_os = "linux") {
+            t(app, "Paket yöneticisiyle güncelle", &[])
+        } else if updating {
             t(app, "Güncelleniyor…", &[])
         } else if let Some(v) = &available {
             t(app, "Güncellemeyi kur · v{0}", &[v])
@@ -1057,7 +1065,7 @@ fn refresh_update_ui(app: &AppHandle) {
             t(app, "Güncellemeleri denetle", &[])
         };
         let _ = item.set_text(text);
-        let _ = item.set_enabled(!updating);
+        let _ = item.set_enabled(!updating && !cfg!(target_os = "linux"));
     }
     let _ = app.emit_to(SETTINGS_WIN, "update-status", update_status_value(app));
 }
@@ -1065,6 +1073,11 @@ fn refresh_update_ui(app: &AppHandle) {
 /// Daha yeni bir sürüm var mı? Varsa sürümü döndürür. GitHub kipinde denetim arka planda
 /// yürür; dönen değer son bilinen sonuçtur.
 fn check_update(app: &AppHandle, notify_user: bool) -> Option<String> {
+    // Distribution packages are upgraded by the package manager. Tauri's installer
+    // cannot replace a pacman-owned binary in /usr/bin.
+    if cfg!(target_os = "linux") {
+        return None;
+    }
     if update::project_dir().is_none() {
         github_check(app, notify_user, false);
         return state(app).update_version.lock().unwrap().clone();
@@ -1239,6 +1252,9 @@ fn update_install(app: AppHandle) -> Result<(), String> {
 }
 
 fn update_install_inner(app: AppHandle) -> Result<(), String> {
+    if cfg!(target_os = "linux") {
+        return Err("Paket yöneticisiyle güncelle".into());
+    }
     if check_update(&app, false).is_none() {
         return Err("Kurulacak yeni sürüm yok".into());
     }
@@ -1455,7 +1471,17 @@ fn build_menu(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
     let settings = MenuItem::with_id(app, "settings", l("Ayarlar ve tema"), true, Some("Ctrl+,"))?;
     let reload = MenuItem::with_id(app, "reload", l("Yeniden yükle"), true, None::<&str>)?;
     let devtools = MenuItem::with_id(app, "devtools", l("Geliştirici araçları"), true, None::<&str>)?;
-    let update = MenuItem::with_id(app, "update", l("Güncellemeleri denetle"), true, None::<&str>)?;
+    let update = MenuItem::with_id(
+        app,
+        "update",
+        if cfg!(target_os = "linux") {
+            l("Paket yöneticisiyle güncelle")
+        } else {
+            l("Güncellemeleri denetle")
+        },
+        !cfg!(target_os = "linux"),
+        None::<&str>,
+    )?;
     let quit = MenuItem::with_id(app, "quit", l("Çıkış"), true, None::<&str>)?;
     let sep = || PredefinedMenuItem::separator(app);
     let menu = Menu::with_items(
@@ -1674,6 +1700,9 @@ fn main() {
             // Güncelleme denetimi: açılıştan 20 sn sonra, sonra 10 dakikada bir.
             let h = handle.clone();
             std::thread::spawn(move || {
+                if cfg!(target_os = "linux") {
+                    return;
+                }
                 std::thread::sleep(std::time::Duration::from_secs(20));
                 let mut n: u32 = 0;
                 loop {

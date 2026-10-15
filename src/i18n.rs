@@ -1,7 +1,7 @@
 //! Arayüz dili. Metinler kaynakta Türkçe yazılır; İngilizce seçiliyse buradaki tablodan çevrilir.
 //! `{0}`, `{1}`: yer tutucular.
 
-/// Ayardaki dili ("auto" / "tr" / "en") gerçek dile çevirir. "auto": Windows'un dili Türkçeyse
+/// Ayardaki dili ("auto" / "tr" / "en") gerçek dile çevirir. "auto": sistem dili Türkçeyse
 /// Türkçe, değilse İngilizce.
 pub fn resolve(language: &str) -> &'static str {
     match language {
@@ -26,6 +26,7 @@ const EN: &[(&str, &str)] = &[
     ("Yeniden yükle", "Reload"),
     ("Geliştirici araçları", "Developer tools"),
     ("Güncellemeleri denetle", "Check for updates"),
+    ("Paket yöneticisiyle güncelle", "Update with your package manager"),
     ("Çıkış", "Quit"),
     ("Güncelleniyor…", "Updating…"),
     ("Güncellemeyi kur · v{0}", "Install update · v{0}"),

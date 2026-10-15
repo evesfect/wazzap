@@ -1,0 +1,40 @@
+# Maintainer: kvbilai
+pkgname=wazzap-git
+pkgver=0.4.0.r0.gde8eeaf
+pkgrel=1
+pkgdesc='Lightweight WhatsApp Web desktop client'
+arch=('x86_64')
+url='https://github.com/kvbilai/wazzap'
+license=('MIT')
+depends=('gtk3' 'webkit2gtk-4.1' 'libappindicator' 'hicolor-icon-theme')
+makedepends=('cargo' 'git' 'pkgconf' 'librsvg')
+provides=('wazzap')
+conflicts=('wazzap')
+options=('!debug')
+source=('git+https://github.com/kvbilai/wazzap.git')
+sha256sums=('SKIP')
+
+pkgver() {
+  cd wazzap
+  git describe --long --tags --match 'v[0-9]*' | sed -E 's/^v//; s/-([0-9]+)-g([0-9a-f]+)$/\.r\1.g\2/'
+}
+
+build() {
+  cd wazzap
+  export CARGO_TARGET_DIR="$srcdir/target"
+  cargo build --release --locked
+}
+
+check() {
+  cd wazzap
+  export CARGO_TARGET_DIR="$srcdir/target"
+  cargo test --release --locked
+}
+
+package() {
+  install -Dm755 "$srcdir/target/release/wazzap" "$pkgdir/usr/bin/wazzap"
+  install -Dm644 "$srcdir/wazzap/arch/wazzap.desktop" "$pkgdir/usr/share/applications/wazzap.desktop"
+  install -Dm644 "$srcdir/wazzap/icons/128x128.png" "$pkgdir/usr/share/icons/hicolor/128x128/apps/wazzap.png"
+  install -Dm644 "$srcdir/wazzap/icons/128x128@2x.png" "$pkgdir/usr/share/icons/hicolor/256x256/apps/wazzap.png"
+  install -Dm644 "$srcdir/wazzap/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

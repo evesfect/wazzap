@@ -2,10 +2,10 @@
 
 [English](README.md) · **Türkçe**
 
-Windows için hafif bir WhatsApp Web masaüstü istemcisi. Resmi WhatsApp Web'i kendi penceresinde
+Windows ve Linux için hafif bir WhatsApp Web masaüstü istemcisi. Resmi WhatsApp Web'i kendi penceresinde
 açar; üstüne tema, telefon boyutu ve mini pencere, zamanlı mesajlar ve medya toplayıcı ekler.
 Mesajlaşmaya dokunmaz: oturum, şifreleme ve bağlantı tamamen WhatsApp Web'in kendisidir.
-Electron değil, Tauri + sistemdeki WebView2 kullanır; kurulum birkaç MB'tır.
+Electron değil, Tauri ve sistemin web görünümünü kullanır: Windows'ta WebView2, Linux'ta WebKitGTK.
 
 ![Wazzap?, Lacivert temasıyla (projenin test sayfasında)](docs/screenshot.png)
 
@@ -17,6 +17,8 @@ Electron değil, Tauri + sistemdeki WebView2 kullanır; kurulum birkaç MB'tır.
 
 ## Kurulum
 
+### Windows
+
 [Releases](../../releases/latest) sayfasından `Wazzap_*_x64-setup.exe` dosyasını indirip çalıştır.
 Açılınca QR kodu telefonundan bir kere okut, oturum kalıcıdır. Uygulama yeni sürümleri kendisi
 denetler ve tek tıkla kurar.
@@ -24,9 +26,25 @@ denetler ve tek tıkla kurar.
 Kurulum dosyası imzalı olmadığı için Windows ilk açılışta "Windows bilgisayarınızı korudu"
 uyarısı gösterebilir: **Ek bilgi → Yine de çalıştır**.
 
-Arayüz Türkçe ve İngilizce. Windows'un diline göre açılır; Ayarlar → Masaüstü'nden değiştirilebilir.
+Arayüz Türkçe ve İngilizce. Sistem diline göre açılır; Ayarlar → Masaüstü'nden değiştirilebilir.
 
-### Kaynaktan derleme
+### Arch Linux
+
+Bu proje klasöründen çalıştırmak için:
+
+```sh
+sudo pacman -S --needed base-devel rust webkit2gtk-4.1 libappindicator librsvg pkgconf
+cargo run --locked
+```
+
+Kurulabilir Arch paketi için değişiklikler Git deposuna gönderildikten sonra `arch` klasöründe
+`makepkg -si` çalıştır. [`arch/PKGBUILD`](arch/PKGBUILD) ikiliyi, masaüstü kısayolunu ve simgeleri
+kurar. Henüz AUR'da yayımlanmadı. Güncellemeler paket yöneticisi veya AUR yardımcısı üzerinden
+yapılır. Tepsi simgesi için masaüstü ortamında sistem tepsisi veya AppIndicator desteği gerekir;
+“Kapatınca tepside çalışmaya devam etsin” Linux'ta varsayılan olarak kapalıdır. Wayland'de genel
+göster/gizle kısayolu ve pencere konumu kullanılan compositor'a bağlı olabilir.
+
+### Windows'ta kaynaktan derleme
 
 `derle.bat` dosyasına çift tıkla. Betik ilk seferde eksikse **Rust** ve **Visual Studio C++
 derleme araçlarını** winget ile kurar (bir kerelik, birkaç GB, yönetici izni ister), uygulamayı
@@ -88,7 +106,7 @@ görünümü yalnızca ayarlar penceresindedir.
 
 ## Başlık çubuğu
 
-Pencerenin Windows çerçevesi yok; yerine WhatsApp renklerinde ince bir çubuk var (her modda).
+Pencerenin sistem çerçevesi yok; yerine WhatsApp renklerinde ince bir çubuk var (her modda).
 Sağında: mini pencere, iğne (her zaman üstte, açıkken renkli), alta al, tam ekran, kapat.
 Çubuktan sürüklenir, çift tıklayınca tam ekran olur; ekran kenarına sürükleyip yapıştırma
 (Windows Snap) ve kenarlardan boyutlandırma çalışır. Kapat, ayarlara göre tepsiye gizler ya da çıkar.

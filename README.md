@@ -2,11 +2,11 @@
 
 **English** · [Türkçe](README.tr.md)
 
-A lightweight Windows desktop client for WhatsApp Web. Wazzap? opens the official WhatsApp Web in its
+A lightweight Windows and Linux desktop client for WhatsApp Web. Wazzap? opens the official WhatsApp Web in its
 own window and adds themes, a phone-sized and a mini window, scheduled messages and a media
 collector on top. It does not touch messaging itself: the session, encryption and connection are
-WhatsApp Web's own. Built with Tauri and the system WebView2 instead of Electron, so the installer
-is a few MB.
+WhatsApp Web's own. Built with Tauri and the system webview (WebView2 on Windows, WebKitGTK on
+Linux) instead of Electron.
 
 > **Disclaimer:** Wazzap? is an independent project. It is not affiliated with, endorsed by or
 > sponsored by WhatsApp LLC or Meta Platforms. "WhatsApp" is a trademark of Meta. Scheduled
@@ -16,6 +16,8 @@ is a few MB.
 
 ## Install
 
+### Windows
+
 Download `Wazzap_*_x64-setup.exe` from [Releases](../../releases/latest) and run it. Scan the QR
 code with your phone once; the session is kept. The app checks for new versions itself and installs
 them in one click.
@@ -23,10 +25,28 @@ them in one click.
 The installer is not code-signed, so Windows may show "Windows protected your PC" the first time:
 choose **More info → Run anyway**.
 
-The interface is in English and Turkish. It follows the Windows display language; change it under
+The interface is in English and Turkish. It follows the system language; change it under
 Settings → Desktop.
 
-### Build from source
+### Arch Linux
+
+Install the build dependencies and run from this checkout:
+
+```sh
+sudo pacman -S --needed base-devel rust webkit2gtk-4.1 libappindicator librsvg pkgconf
+cargo run --locked
+```
+
+To build an installable Arch package, use [`arch/PKGBUILD`](arch/PKGBUILD) with `makepkg -si` from
+the `arch` directory after these changes are available in the Git repository. The package installs
+the binary, desktop entry and icons. The recipe follows the latest Git commit, so update it with
+`makepkg -si` or an AUR helper. It is not published to the AUR yet.
+
+Linux uses WebKitGTK. A desktop environment with a system tray or AppIndicator support is needed
+for the tray menu; “Close to tray” starts disabled on Linux and can be enabled in Settings. On
+Wayland, the global show/hide shortcut and window positioning may depend on the compositor.
+
+### Build from source on Windows
 
 Double-click `derle.bat`. On first run it installs **Rust** and the **Visual Studio C++ build
 tools** with winget if they are missing (one time, a few GB, asks for admin rights), builds the app,
@@ -50,8 +70,9 @@ updates from the project folder instead of GitHub, which is handy for developmen
   late are not sent automatically.
 - **Media collector** (Ctrl+Shift+M): images, videos and documents of the open chat in tabs; save
   selected or all to `Downloads\Wazzap\<chat>` at full resolution.
-- **Desktop integration:** taskbar unread badge, clickable notifications that open the chat, tray,
-  global show / hide shortcut (Ctrl+Shift+Space), start with Windows, zoom.
+- **Desktop integration:** unread tray indicator, notifications, tray, global show / hide shortcut
+  (Ctrl+Shift+Space), start at login, zoom. Windows also has a taskbar badge and notifications that
+  open the chat when clicked.
 
 ## Shortcuts
 
@@ -72,10 +93,12 @@ Closing the window keeps Wazzap? running in the tray; quit from the tray menu.
 ## Privacy
 
 Wazzap? adds no servers, analytics or accounts. Everything it stores stays on your computer in
-`%APPDATA%\com.kvbilai.wazzap`: settings (`ayarlar.json`), scheduled messages (`zamanli.json`) and,
+`%APPDATA%\com.kvbilai.wazzap` on Windows or the XDG config/data directories on Linux: settings
+(`ayarlar.json`), scheduled messages (`zamanli.json`) and,
 only when you ask for one, diagnostic files (`tanilama/`) that contain colour variables and page
 structure but no messages, names or numbers. The only network request Wazzap? itself makes is the
-update check against this repository's GitHub Releases.
+update check against this repository's GitHub Releases on Windows. Linux packages are updated
+through the package manager.
 
 ## Development
 
@@ -85,7 +108,7 @@ update check against this repository's GitHub Releases.
 | `src/settings.rs` | Settings and the default theme |
 | `src/schedule.rs` | Scheduled message store and the timing decision (unit tested) |
 | `src/update.rs` | Update check from the project folder (development installs) |
-| `src/badge.rs` | Taskbar badge and tray dot |
+| `src/badge.rs` | Windows taskbar badge and tray dot |
 | `inject/bridge.js` | The layer injected into WhatsApp Web: theme engine, layouts, title bar, scheduler UI, media collector |
 | `inject/*.css` | Styles for that layer, drawn only with WhatsApp's own colour variables |
 | `ui/index.html` | Settings window |

@@ -301,7 +301,7 @@
     <div class="body">
       <div class="chips" id="langChips" aria-label="Dil · Language"></div>
       <label class="check"><input type="checkbox" id="closeToTray"> Kapatınca tepside çalışmaya devam etsin</label>
-      <label class="check"><input type="checkbox" id="autostart"> Windows açılınca arka planda başlasın</label>
+      <label class="check"><input type="checkbox" id="autostart"> Oturum açılınca arka planda başlasın</label>
       <label class="check"><input type="checkbox" id="notifications"> Bildirim göster</label>
       <label class="check"><input type="checkbox" id="notifyPreview"> Bildirimde mesajın kendisini göster</label>
       <div class="code" id="keys">
@@ -445,7 +445,7 @@ const EN = {
   "Bir sohbette sol alttaki saat düğmesine ya da Ctrl + Shift + Enter'a bas. Mesaj zamanında gitsin diye Wazzap? açık ve bilgisayar uyanık olmalı; 10 dakikadan fazla geciken mesaj gönderilmez, burada bekler.": "In a chat, press the clock button at the bottom left or Ctrl + Shift + Enter. For a message to go out on time, Wazzap? must be running and the computer awake; messages more than 10 minutes late are not sent and wait here.",
   "Masaüstü": "Desktop",
   "Kapatınca tepside çalışmaya devam etsin": "Keep running in the tray when closed",
-  "Windows açılınca arka planda başlasın": "Start in the background with Windows",
+  "Oturum açılınca arka planda başlasın": "Start in the background at login",
   "Bildirim göster": "Show notifications",
   "Bildirimde mesajın kendisini göster": "Show the message text in notifications",
   "Ctrl + Shift + Boşluk": "Ctrl + Shift + Space",
@@ -465,6 +465,7 @@ const EN = {
   "Güncelleme": "Update",
   "Denetle": "Check",
   "Güncellemeyi kur": "Install update",
+  "Paket yöneticin veya AUR yardımcın ile güncelle.": "Update with your package manager or AUR helper.",
   "Tanılama dosyası yalnızca renk değişkenlerini ve sayfa yapısını içerir; mesaj, kişi adı ya da numara yazılmaz. Tema bir yerde tutmazsa bu dosyayı paylaş.": "The diagnostics file contains only colour variables and page structure; no messages, names or numbers. Share it if the theme does not fit somewhere.",
   "· MIT lisansı": "· MIT licence",
   "WhatsApp veya Meta ile bağlantılı değildir.": "Not affiliated with WhatsApp or Meta.",
@@ -1133,6 +1134,13 @@ setInterval(() => { if(SCHED.some(i => i.status === 'bekliyor')) renderSched(); 
 function renderUpd(u){
   if(!u) return;
   const t = $('#updText');
+  if(u.source === 'package'){
+    t.textContent = L('Paket yöneticin veya AUR yardımcın ile güncelle.');
+    $('#updCheck').hidden = true;
+    $('#updInstall').hidden = true;
+    return;
+  }
+  $('#updCheck').hidden = false;
   const gh = u.source === 'github';
   if(u.updating) t.textContent = gh ? L('İndiriliyor. Kurulum bitince uygulama yeniden açılır.')
     : L('Güncelleniyor. Derleme birkaç dakika sürer, sonra uygulama yeniden açılır.');
